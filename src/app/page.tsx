@@ -1,7 +1,8 @@
 'use client'
 
 import Link from 'next/link'
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
+import { motion, useScroll, useTransform, useInView } from 'framer-motion'
 
 interface BlogPost {
   id: string
@@ -17,6 +18,10 @@ interface BlogPost {
 export default function Home() {
   const [latestPost, setLatestPost] = useState<BlogPost | null>(null)
   const [recentPosts, setRecentPosts] = useState<BlogPost[]>([])
+  const containerRef = useRef<HTMLDivElement>(null)
+  const aboutRef = useRef<HTMLDivElement>(null)
+  const { scrollYProgress } = useScroll({ target: containerRef })
+  const aboutInView = useInView(aboutRef, { once: true, margin: "-100px" })
 
   useEffect(() => {
     const fetchPosts = async () => {
@@ -36,13 +41,30 @@ export default function Home() {
   }, [])
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex">
-      {/* Left Panel */}
-      <div className="w-1/2 bg-white dark:bg-gray-800 p-8 flex flex-col justify-between relative">
-        {/* Logo */}
-        <div className="text-6xl font-bold text-gray-900 dark:text-white">
-          Deploy Diaries
-        </div>
+    <div ref={containerRef} className="min-h-screen bg-gray-50 dark:bg-gray-900">
+      {/* Main Blog Section */}
+      <motion.div 
+        className="min-h-screen flex"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 0.8 }}
+      >
+        {/* Left Panel */}
+        <motion.div 
+          className="w-1/2 bg-white dark:bg-gray-800 p-8 flex flex-col justify-between relative"
+          initial={{ x: -100, opacity: 0 }}
+          animate={{ x: 0, opacity: 1 }}
+          transition={{ duration: 0.8, delay: 0.2 }}
+        >
+          {/* Logo */}
+          <motion.div 
+            className="text-6xl font-bold text-gray-900 dark:text-white"
+            initial={{ y: -50, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            transition={{ duration: 0.6, delay: 0.4 }}
+          >
+            Deploy Diaries
+          </motion.div>
         
         {/* Vertical Text */}
         <div className="absolute left-8 top-1/2 -translate-y-1/2 -rotate-90 origin-left">
@@ -51,23 +73,48 @@ export default function Home() {
           </span>
         </div>
         
-        {/* Description */}
-        <div className="max-w-md ml-16">
-          <p className="text-gray-700 dark:text-gray-300 leading-relaxed mb-8">
-            A builder's notebook from the edge of the cloud. I document experiments, architectures, and lessons learned in the world of AWS — the good, the broken, and the beautifully optimized. Follow along as I turn trials into tutorials and concepts into code.
-          </p>
-        </div>
+          {/* Description */}
+          <motion.div 
+            className="max-w-md ml-16"
+            initial={{ y: 50, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            transition={{ duration: 0.6, delay: 0.6 }}
+          >
+            <p className="text-gray-700 dark:text-gray-300 leading-relaxed mb-8">
+              A builder's notebook from the edge of the cloud. I document experiments, architectures, and lessons learned in the world of AWS — the good, the broken, and the beautifully optimized. Follow along as I turn trials into tutorials and concepts into code.
+            </p>
+          </motion.div>
         
-        {/* Cloud Deployment Animation */}
-        <div className="flex justify-center mt-8">
+          {/* Cloud Deployment Animation */}
+          <motion.div 
+            className="flex justify-center mt-8"
+            initial={{ scale: 0.8, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            transition={{ duration: 0.8, delay: 0.8 }}
+          >
           <div className="w-64 h-64 bg-gradient-to-br from-slate-700 to-slate-900 rounded-lg flex flex-col items-center justify-center relative overflow-hidden">
             {/* Cloud */}
-            <div className="relative mb-8">
-              <div className="w-16 h-10 bg-blue-400 rounded-full relative">
-                <div className="absolute -left-2 top-2 w-6 h-6 bg-blue-400 rounded-full"></div>
-                <div className="absolute -right-2 top-2 w-6 h-6 bg-blue-400 rounded-full"></div>
-                <div className="absolute -top-1 left-3 w-10 h-5 bg-blue-400 rounded-full"></div>
-              </div>
+            <div className="relative mb-8 flex justify-center items-center">
+              <svg
+                width="120"
+                height="70"
+                viewBox="0 0 120 70"
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
+                className="animate-pulse"
+                style={{ filter: "drop-shadow(0 4px 16px rgba(0,0,64,0.15))" }}
+              >
+                <defs>
+                  <radialGradient id="cloudGradient" cx="50%" cy="50%" r="80%">
+                    <stop offset="0%" stopColor="#60a5fa" />
+                    <stop offset="100%" stopColor="#2563eb" />
+                  </radialGradient>
+                </defs>
+                <ellipse cx="60" cy="40" rx="40" ry="22" fill="url(#cloudGradient)" />
+                <ellipse cx="40" cy="38" rx="18" ry="14" fill="url(#cloudGradient)" />
+                <ellipse cx="80" cy="38" rx="18" ry="14" fill="url(#cloudGradient)" />
+                <ellipse cx="60" cy="28" rx="22" ry="14" fill="url(#cloudGradient)" />
+              </svg>
             </div>
             
             {/* Deployment arrows - animated */}
@@ -91,15 +138,26 @@ export default function Home() {
               <div className="w-2 h-2 bg-green-500 rounded-full animate-ping" style={{animationDelay: '2.3s'}}></div>
               <div className="w-2 h-2 bg-green-500 rounded-full animate-ping" style={{animationDelay: '2.6s'}}></div>
             </div>
-          </div>
-        </div>
-      </div>
+            </div>
+          </motion.div>
+        </motion.div>
       
-      {/* Right Panel */}
-      <div className="w-1/2 p-8">
-        {/* Featured Article */}
-        {latestPost ? (
-          <article className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-8 mb-8">
+        {/* Right Panel */}
+        <motion.div 
+          className="w-1/2 p-8"
+          initial={{ x: 100, opacity: 0 }}
+          animate={{ x: 0, opacity: 1 }}
+          transition={{ duration: 0.8, delay: 0.3 }}
+        >
+          {/* Featured Article */}
+          {latestPost ? (
+            <motion.article 
+              className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-8 mb-8"
+              initial={{ y: 30, opacity: 0 }}
+              animate={{ y: 0, opacity: 1 }}
+              transition={{ duration: 0.6, delay: 0.5 }}
+              whileHover={{ y: -5, transition: { duration: 0.2 } }}
+            >
             {latestPost.previewImage && (
               <div className="w-full h-48 rounded-lg mb-6 overflow-hidden">
                 <img 
@@ -133,10 +191,15 @@ export default function Home() {
               className="text-blue-600 dark:text-blue-400 hover:underline font-medium"
             >
               Read more
-            </Link>
-          </article>
-        ) : (
-          <article className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-8 mb-8">
+              </Link>
+            </motion.article>
+          ) : (
+            <motion.article 
+              className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-8 mb-8"
+              initial={{ y: 30, opacity: 0 }}
+              animate={{ y: 0, opacity: 1 }}
+              transition={{ duration: 0.6, delay: 0.5 }}
+            >
             <div className="text-center py-8">
               <p className="text-gray-600 dark:text-gray-400 mb-4">No articles yet</p>
               <Link
@@ -145,14 +208,26 @@ export default function Home() {
               >
                 Write the first article
               </Link>
-            </div>
-          </article>
-        )}
+              </div>
+            </motion.article>
+          )}
         
-        {/* Additional Articles Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {recentPosts.map((post, index) => (
-            <article key={post.id} className="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
+          {/* Additional Articles Grid */}
+          <motion.div 
+            className="grid grid-cols-1 md:grid-cols-2 gap-6"
+            initial={{ y: 50, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            transition={{ duration: 0.6, delay: 0.7 }}
+          >
+            {recentPosts.map((post, index) => (
+              <motion.article 
+                key={post.id} 
+                className="bg-white dark:bg-gray-800 rounded-lg shadow p-6"
+                initial={{ y: 50, opacity: 0 }}
+                animate={{ y: 0, opacity: 1 }}
+                transition={{ duration: 0.5, delay: 0.8 + index * 0.1 }}
+                whileHover={{ y: -5, transition: { duration: 0.2 } }}
+              >
               {post.previewImage ? (
                 <div className="w-full h-32 rounded mb-4 overflow-hidden">
                   <img 
@@ -174,53 +249,200 @@ export default function Home() {
                 className="text-blue-600 dark:text-blue-400 hover:underline"
               >
                 Read more
-              </Link>
-            </article>
-          ))}
+                </Link>
+              </motion.article>
+            ))}
           
-          {/* Fill empty slots if needed */}
-          {recentPosts.length === 0 && (
-            <>
-              <article className="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
-                <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-3">
-                  Minimalism in the Age of Excess: Aesthetic or Ideology?
-                </h3>
-                <Link 
-                  href="/blog/minimalism" 
-                  className="text-blue-600 dark:text-blue-400 hover:underline"
+            {/* Fill empty slots if needed */}
+            {recentPosts.length === 0 && (
+              <>
+                <motion.article 
+                  className="bg-white dark:bg-gray-800 rounded-lg shadow p-6"
+                  initial={{ y: 50, opacity: 0 }}
+                  animate={{ y: 0, opacity: 1 }}
+                  transition={{ duration: 0.5, delay: 0.8 }}
+                  whileHover={{ y: -5, transition: { duration: 0.2 } }}
                 >
-                  Read more
-                </Link>
-              </article>
+                  <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-3">
+                    Minimalism in the Age of Excess: Aesthetic or Ideology?
+                  </h3>
+                  <Link 
+                    href="/blog/minimalism" 
+                    className="text-blue-600 dark:text-blue-400 hover:underline"
+                  >
+                    Read more
+                  </Link>
+                </motion.article>
               
-              <article className="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
-                <div className="w-full h-32 bg-gradient-to-r from-blue-400 to-yellow-400 rounded mb-4 flex items-center justify-center">
-                  <div className="w-16 h-16 bg-orange-500 rounded-full"></div>
-                </div>
-                <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-3">
-                  Slow Thinking in a Fast World: Why Deep Reflection is a Radical Act
-                </h3>
-                <Link 
-                  href="/blog/slow-thinking" 
-                  className="text-blue-600 dark:text-blue-400 hover:underline"
+                <motion.article 
+                  className="bg-white dark:bg-gray-800 rounded-lg shadow p-6"
+                  initial={{ y: 50, opacity: 0 }}
+                  animate={{ y: 0, opacity: 1 }}
+                  transition={{ duration: 0.5, delay: 0.9 }}
+                  whileHover={{ y: -5, transition: { duration: 0.2 } }}
                 >
-                  Read more
-                </Link>
-              </article>
-            </>
-          )}
+                  <div className="w-full h-32 bg-gradient-to-r from-blue-400 to-yellow-400 rounded mb-4 flex items-center justify-center">
+                    <div className="w-16 h-16 bg-orange-500 rounded-full"></div>
+                  </div>
+                  <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-3">
+                    Slow Thinking in a Fast World: Why Deep Reflection is a Radical Act
+                  </h3>
+                  <Link 
+                    href="/blog/slow-thinking" 
+                    className="text-blue-600 dark:text-blue-400 hover:underline"
+                  >
+                    Read more
+                  </Link>
+                </motion.article>
+              </>
+            )}
+          </motion.div>
+        
+          {/* Blog Link */}
+          <motion.div 
+            className="mt-8 text-center"
+            initial={{ y: 30, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            transition={{ duration: 0.5, delay: 1 }}
+          >
+            <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+              <Link 
+                href="/blog" 
+                className="inline-flex items-center px-6 py-3 bg-gray-900 dark:bg-white text-white dark:text-gray-900 rounded-lg hover:bg-gray-800 dark:hover:bg-gray-100 transition-colors"
+              >
+                + BLOG
+              </Link>
+            </motion.div>
+          </motion.div>
+        </motion.div>
+      </motion.div>
+
+      {/* About Section - Apple Style */}
+      <motion.div 
+        ref={aboutRef}
+        className="min-h-screen bg-white dark:bg-black flex items-center justify-center relative overflow-hidden"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: aboutInView ? 1 : 0 }}
+        transition={{ duration: 1 }}
+      >
+        {/* Background Pattern */}
+        <div className="absolute inset-0 bg-gradient-to-br from-gray-50 to-white dark:from-gray-900 dark:to-black opacity-50"></div>
+        
+        {/* Content Container */}
+        <div className="relative z-10 max-w-4xl mx-auto px-8 text-center">
+          <motion.div
+            initial={{ y: 100, opacity: 0 }}
+            animate={{ y: aboutInView ? 0 : 100, opacity: aboutInView ? 1 : 0 }}
+            transition={{ duration: 0.8, delay: 0.2 }}
+          >
+            <h2 className="text-6xl md:text-8xl font-thin text-gray-900 dark:text-white mb-8">
+              About
+            </h2>
+          </motion.div>
+          
+          <motion.div
+            initial={{ y: 100, opacity: 0 }}
+            animate={{ y: aboutInView ? 0 : 100, opacity: aboutInView ? 1 : 0 }}
+            transition={{ duration: 0.8, delay: 0.4 }}
+            className="space-y-8"
+          >
+            <p className="text-2xl md:text-3xl font-light text-gray-700 dark:text-gray-300 leading-relaxed">
+              Building the future,<br />
+              one deployment at a time.
+            </p>
+            
+            <div className="max-w-2xl mx-auto">
+              <p className="text-lg text-gray-600 dark:text-gray-400 leading-relaxed mb-6">
+                I'm a cloud architect and developer passionate about creating scalable, 
+                resilient systems in the AWS ecosystem. My journey spans from startup 
+                experimentation to enterprise-grade infrastructure.
+              </p>
+              
+              <p className="text-lg text-gray-600 dark:text-gray-400 leading-relaxed">
+                Through Deploy Diaries, I share the real stories behind the code—the 
+                victories, the failures, and the lessons learned in between. Every post 
+                is a glimpse into the iterative process of building something meaningful.
+              </p>
+            </div>
+          </motion.div>
+          
+          <motion.div
+            initial={{ y: 100, opacity: 0 }}
+            animate={{ y: aboutInView ? 0 : 100, opacity: aboutInView ? 1 : 0 }}
+            transition={{ duration: 0.8, delay: 0.6 }}
+            className="mt-16 flex flex-wrap justify-center gap-8"
+          >
+            {['AWS', 'Serverless', 'DevOps', 'Infrastructure as Code', 'Microservices'].map((skill, index) => (
+              <motion.div
+                key={skill}
+                className="px-6 py-3 bg-gray-100 dark:bg-gray-800 rounded-full text-gray-700 dark:text-gray-300 font-medium"
+                initial={{ scale: 0, opacity: 0 }}
+                animate={{ scale: aboutInView ? 1 : 0, opacity: aboutInView ? 1 : 0 }}
+                transition={{ duration: 0.4, delay: 0.8 + index * 0.1 }}
+                whileHover={{ scale: 1.05 }}
+              >
+                {skill}
+              </motion.div>
+            ))}
+          </motion.div>
+          
+          <motion.div
+            initial={{ y: 50, opacity: 0 }}
+            animate={{ y: aboutInView ? 0 : 50, opacity: aboutInView ? 1 : 0 }}
+            transition={{ duration: 0.8, delay: 1 }}
+            className="mt-16"
+          >
+            <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+              <Link
+                href="/contact"
+                className="inline-flex items-center px-8 py-4 bg-black dark:bg-white text-white dark:text-black rounded-full text-lg font-medium hover:bg-gray-800 dark:hover:bg-gray-200 transition-colors"
+              >
+                Get in touch
+              </Link>
+            </motion.div>
+          </motion.div>
         </div>
         
-        {/* Blog Link */}
-        <div className="mt-8 text-center">
-          <Link 
-            href="/blog" 
-            className="inline-flex items-center px-6 py-3 bg-gray-900 dark:bg-white text-white dark:text-gray-900 rounded-lg hover:bg-gray-800 dark:hover:bg-gray-100 transition-colors"
-          >
-            + BLOG
-          </Link>
-        </div>
-      </div>
+        {/* Floating Elements */}
+        <motion.div
+          className="absolute top-20 left-20 w-4 h-4 bg-blue-500 rounded-full opacity-20"
+          animate={{ 
+            y: [0, -20, 0],
+            scale: [1, 1.2, 1]
+          }}
+          transition={{ 
+            duration: 3, 
+            repeat: Infinity,
+            repeatType: "loop"
+          }}
+        />
+        <motion.div
+          className="absolute bottom-32 right-32 w-6 h-6 bg-green-500 rounded-full opacity-20"
+          animate={{ 
+            y: [0, -30, 0],
+            scale: [1, 0.8, 1]
+          }}
+          transition={{ 
+            duration: 4, 
+            repeat: Infinity,
+            repeatType: "loop",
+            delay: 1
+          }}
+        />
+        <motion.div
+          className="absolute top-1/2 right-20 w-3 h-3 bg-purple-500 rounded-full opacity-20"
+          animate={{ 
+            x: [0, -15, 0],
+            scale: [1, 1.3, 1]
+          }}
+          transition={{ 
+            duration: 5, 
+            repeat: Infinity,
+            repeatType: "loop",
+            delay: 2
+          }}
+        />
+      </motion.div>
     </div>
   )
 }
