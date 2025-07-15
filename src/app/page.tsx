@@ -1,103 +1,226 @@
-import Image from "next/image";
+'use client'
+
+import Link from 'next/link'
+import { useState, useEffect } from 'react'
+
+interface BlogPost {
+  id: string
+  title: string
+  author: string
+  date: string
+  content: string
+  excerpt?: string
+  images?: string[]
+  slug: string
+}
 
 export default function Home() {
-  return (
-    <div className="font-sans grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20">
-      <main className="flex flex-col gap-[32px] row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="font-mono list-inside list-decimal text-sm/6 text-center sm:text-left">
-          <li className="mb-2 tracking-[-.01em]">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] font-mono font-semibold px-1 py-0.5 rounded">
-              src/app/page.tsx
-            </code>
-            .
-          </li>
-          <li className="tracking-[-.01em]">
-            Save and see your changes instantly.
-          </li>
-        </ol>
+  const [latestPost, setLatestPost] = useState<BlogPost | null>(null)
+  const [recentPosts, setRecentPosts] = useState<BlogPost[]>([])
 
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:w-auto"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 w-full sm:w-auto md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
+  useEffect(() => {
+    const fetchPosts = async () => {
+      try {
+        const response = await fetch('/api/posts')
+        const data = await response.json()
+        if (data.posts && data.posts.length > 0) {
+          setLatestPost(data.posts[0])
+          setRecentPosts(data.posts.slice(1, 3))
+        }
+      } catch (error) {
+        console.error('Error fetching posts:', error)
+      }
+    }
+
+    fetchPosts()
+  }, [])
+
+  return (
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex">
+      {/* Left Panel */}
+      <div className="w-1/2 bg-white dark:bg-gray-800 p-8 flex flex-col justify-between relative">
+        {/* Logo */}
+        <div className="text-6xl font-bold text-gray-900 dark:text-white">
+          Deploy Diaries
         </div>
-      </main>
-      <footer className="row-start-3 flex gap-[24px] flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
+        
+        {/* Vertical Text */}
+        <div className="absolute left-8 top-1/2 -translate-y-1/2 -rotate-90 origin-left">
+          <span className="text-sm font-medium text-gray-600 dark:text-gray-400 tracking-widest">
+            PUB | MODERNIST
+          </span>
+        </div>
+        
+        {/* Description */}
+        <div className="max-w-md ml-16">
+          <p className="text-gray-700 dark:text-gray-300 leading-relaxed mb-8">
+            A builder's notebook from the edge of the cloud. I document experiments, architectures, and lessons learned in the world of AWS — the good, the broken, and the beautifully optimized. Follow along as I turn trials into tutorials and concepts into code.
+          </p>
+        </div>
+        
+        {/* Cloud Deployment Animation */}
+        <div className="flex justify-center mt-8">
+          <div className="w-64 h-64 bg-gradient-to-br from-slate-700 to-slate-900 rounded-lg flex flex-col items-center justify-center relative overflow-hidden">
+            {/* Cloud */}
+            <div className="relative mb-8">
+              <div className="w-16 h-10 bg-blue-400 rounded-full relative">
+                <div className="absolute -left-2 top-2 w-6 h-6 bg-blue-400 rounded-full"></div>
+                <div className="absolute -right-2 top-2 w-6 h-6 bg-blue-400 rounded-full"></div>
+                <div className="absolute -top-1 left-3 w-10 h-5 bg-blue-400 rounded-full"></div>
+              </div>
+            </div>
+            
+            {/* Deployment arrows - animated */}
+            <div className="flex flex-col space-y-2">
+              <div className="animate-pulse">
+                <div className="w-1 h-8 bg-green-400 mx-auto"></div>
+                <div className="w-0 h-0 border-l-2 border-r-2 border-t-4 border-transparent border-t-green-400 mx-auto"></div>
+              </div>
+            </div>
+            
+            {/* Servers/Containers */}
+            <div className="flex space-x-2 mt-4">
+              <div className="w-6 h-8 bg-gray-300 rounded animate-pulse" style={{animationDelay: '0.5s'}}></div>
+              <div className="w-6 h-8 bg-gray-300 rounded animate-pulse" style={{animationDelay: '1s'}}></div>
+              <div className="w-6 h-8 bg-gray-300 rounded animate-pulse" style={{animationDelay: '1.5s'}}></div>
+            </div>
+            
+            {/* Status indicators */}
+            <div className="flex space-x-1 mt-3">
+              <div className="w-2 h-2 bg-green-500 rounded-full animate-ping" style={{animationDelay: '2s'}}></div>
+              <div className="w-2 h-2 bg-green-500 rounded-full animate-ping" style={{animationDelay: '2.3s'}}></div>
+              <div className="w-2 h-2 bg-green-500 rounded-full animate-ping" style={{animationDelay: '2.6s'}}></div>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      {/* Right Panel */}
+      <div className="w-1/2 p-8">
+        {/* Featured Article */}
+        {latestPost ? (
+          <article className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-8 mb-8">
+            {latestPost.previewImage && (
+              <div className="w-full h-48 rounded-lg mb-6 overflow-hidden">
+                <img 
+                  src={latestPost.previewImage} 
+                  alt={`Preview for ${latestPost.title}`}
+                  className="w-full h-full object-cover"
+                />
+              </div>
+            )}
+            
+            <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-4 leading-tight">
+              {latestPost.title}
+            </h1>
+            
+            <div className="flex items-center text-gray-600 dark:text-gray-400 mb-6">
+              <span className="font-medium">{latestPost.author}</span>
+              <span className="mx-2">•</span>
+              <span>{new Date(latestPost.date).toLocaleDateString('en-US', { 
+                month: 'short', 
+                day: 'numeric',
+                year: 'numeric'
+              }).replace(',', '—')}</span>
+            </div>
+            
+            <p className="text-gray-700 dark:text-gray-300 leading-relaxed mb-6">
+              {latestPost.excerpt || latestPost.content.replace(/<[^>]*>/g, '').substring(0, 200) + '...'}
+            </p>
+            
+            <Link 
+              href={`/blog/${latestPost.slug}`}
+              className="text-blue-600 dark:text-blue-400 hover:underline font-medium"
+            >
+              Read more
+            </Link>
+          </article>
+        ) : (
+          <article className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-8 mb-8">
+            <div className="text-center py-8">
+              <p className="text-gray-600 dark:text-gray-400 mb-4">No articles yet</p>
+              <Link
+                href="/write"
+                className="text-blue-600 dark:text-blue-400 hover:underline font-medium"
+              >
+                Write the first article
+              </Link>
+            </div>
+          </article>
+        )}
+        
+        {/* Additional Articles Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          {recentPosts.map((post, index) => (
+            <article key={post.id} className="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
+              {post.previewImage ? (
+                <div className="w-full h-32 rounded mb-4 overflow-hidden">
+                  <img 
+                    src={post.previewImage} 
+                    alt={`Preview for ${post.title}`}
+                    className="w-full h-full object-cover"
+                  />
+                </div>
+              ) : index === 1 && (
+                <div className="w-full h-32 bg-gradient-to-r from-blue-400 to-yellow-400 rounded mb-4 flex items-center justify-center">
+                  <div className="w-16 h-16 bg-orange-500 rounded-full"></div>
+                </div>
+              )}
+              <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-3">
+                {post.title}
+              </h3>
+              <Link 
+                href={`/blog/${post.slug}`}
+                className="text-blue-600 dark:text-blue-400 hover:underline"
+              >
+                Read more
+              </Link>
+            </article>
+          ))}
+          
+          {/* Fill empty slots if needed */}
+          {recentPosts.length === 0 && (
+            <>
+              <article className="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
+                <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-3">
+                  Minimalism in the Age of Excess: Aesthetic or Ideology?
+                </h3>
+                <Link 
+                  href="/blog/minimalism" 
+                  className="text-blue-600 dark:text-blue-400 hover:underline"
+                >
+                  Read more
+                </Link>
+              </article>
+              
+              <article className="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
+                <div className="w-full h-32 bg-gradient-to-r from-blue-400 to-yellow-400 rounded mb-4 flex items-center justify-center">
+                  <div className="w-16 h-16 bg-orange-500 rounded-full"></div>
+                </div>
+                <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-3">
+                  Slow Thinking in a Fast World: Why Deep Reflection is a Radical Act
+                </h3>
+                <Link 
+                  href="/blog/slow-thinking" 
+                  className="text-blue-600 dark:text-blue-400 hover:underline"
+                >
+                  Read more
+                </Link>
+              </article>
+            </>
+          )}
+        </div>
+        
+        {/* Blog Link */}
+        <div className="mt-8 text-center">
+          <Link 
+            href="/blog" 
+            className="inline-flex items-center px-6 py-3 bg-gray-900 dark:bg-white text-white dark:text-gray-900 rounded-lg hover:bg-gray-800 dark:hover:bg-gray-100 transition-colors"
+          >
+            + BLOG
+          </Link>
+        </div>
+      </div>
     </div>
-  );
+  )
 }
