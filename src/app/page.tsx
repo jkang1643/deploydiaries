@@ -1,8 +1,9 @@
 'use client'
 
 import Link from 'next/link'
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect, useRef, useLayoutEffect } from 'react'
 import { motion, useScroll, useTransform, useInView } from 'framer-motion'
+import React from 'react' // Added for React.Fragment
 
 interface BlogPost {
   id: string
@@ -39,6 +40,21 @@ export default function Home() {
 
     fetchPosts()
   }, [])
+
+  // --- Cloud/Server Animation with dynamic alignment ---
+  const cloudRef = useRef(null);
+  const [cloudBase, setCloudBase] = useState({ x: 128, y: 80 });
+  useLayoutEffect(() => {
+    if (cloudRef.current) {
+      const rect = cloudRef.current.getBoundingClientRect();
+      const parentRect = cloudRef.current.parentElement.getBoundingClientRect();
+      setCloudBase({
+        x: rect.left + rect.width / 2 - parentRect.left,
+        y: rect.top + rect.height - parentRect.top
+      });
+    }
+  }, []);
+  // ---
 
   return (
     <div ref={containerRef} className="min-h-screen bg-gray-50 dark:bg-gray-900">
@@ -85,61 +101,88 @@ export default function Home() {
             </p>
           </motion.div>
         
-          {/* Cloud Deployment Animation */}
-          <motion.div 
-            className="flex justify-center mt-8"
-            initial={{ scale: 0.8, opacity: 0 }}
-            animate={{ scale: 1, opacity: 1 }}
-            transition={{ duration: 0.8, delay: 0.8 }}
+        {/* Compact, unified SVG for cloud, lines, pulses, and servers */}
+        <div className="flex justify-center items-center mt-16 mb-8" style={{ minHeight: 260 }}>
+          <svg
+            width="300"
+            height="220"
+            viewBox="0 0 180 160"
+            fill="none"
+            xmlns="http://www.w3.org/2000/svg"
+            style={{ display: 'block' }}
           >
-          <div className="w-64 h-64 bg-gradient-to-br from-slate-700 to-slate-900 rounded-lg flex flex-col items-center justify-center relative overflow-hidden">
-            {/* Cloud */}
-            <div className="relative mb-8 flex justify-center items-center">
-              <svg
-                width="120"
-                height="70"
-                viewBox="0 0 120 70"
-                fill="none"
-                xmlns="http://www.w3.org/2000/svg"
-                className="animate-pulse"
-                style={{ filter: "drop-shadow(0 4px 16px rgba(0,0,64,0.15))" }}
-              >
-                <defs>
-                  <radialGradient id="cloudGradient" cx="50%" cy="50%" r="80%">
-                    <stop offset="0%" stopColor="#60a5fa" />
-                    <stop offset="100%" stopColor="#2563eb" />
-                  </radialGradient>
-                </defs>
-                <ellipse cx="60" cy="40" rx="40" ry="22" fill="url(#cloudGradient)" />
-                <ellipse cx="40" cy="38" rx="18" ry="14" fill="url(#cloudGradient)" />
-                <ellipse cx="80" cy="38" rx="18" ry="14" fill="url(#cloudGradient)" />
-                <ellipse cx="60" cy="28" rx="22" ry="14" fill="url(#cloudGradient)" />
-              </svg>
-            </div>
-            
-            {/* Deployment arrows - animated */}
-            <div className="flex flex-col space-y-2">
-              <div className="animate-pulse">
-                <div className="w-1 h-8 bg-green-400 mx-auto"></div>
-                <div className="w-0 h-0 border-l-2 border-r-2 border-t-4 border-transparent border-t-green-400 mx-auto"></div>
-              </div>
-            </div>
-            
-            {/* Servers/Containers */}
-            <div className="flex space-x-2 mt-4">
-              <div className="w-6 h-8 bg-gray-300 rounded animate-pulse" style={{animationDelay: '0.5s'}}></div>
-              <div className="w-6 h-8 bg-gray-300 rounded animate-pulse" style={{animationDelay: '1s'}}></div>
-              <div className="w-6 h-8 bg-gray-300 rounded animate-pulse" style={{animationDelay: '1.5s'}}></div>
-            </div>
-            
-            {/* Status indicators */}
-            <div className="flex space-x-1 mt-3">
-              <div className="w-2 h-2 bg-green-500 rounded-full animate-ping" style={{animationDelay: '2s'}}></div>
-              <div className="w-2 h-2 bg-green-500 rounded-full animate-ping" style={{animationDelay: '2.3s'}}></div>
-              <div className="w-2 h-2 bg-green-500 rounded-full animate-ping" style={{animationDelay: '2.6s'}}></div>
-            </div>
-            </div>
-          </motion.div>
+            {/* Cloud shape at top center */}
+            <g>
+              <ellipse cx="90" cy="28" rx="36" ry="18" fill="url(#cloudGradient)" />
+              <ellipse cx="72" cy="26" rx="14" ry="10" fill="url(#cloudGradient)" />
+              <ellipse cx="108" cy="26" rx="14" ry="10" fill="url(#cloudGradient)" />
+              <ellipse cx="90" cy="18" rx="18" ry="10" fill="url(#cloudGradient)" />
+            </g>
+            <defs>
+              <linearGradient id="cloudGradient" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stopColor="#e0e7ef" />
+                <stop offset="100%" stopColor="#b6c3d1" />
+              </linearGradient>
+            </defs>
+            {/* Lines from base of cloud (90,46) to server tops */}
+            <line x1="90" y1="46" x2="30" y2="100" stroke="#d1d5db" strokeWidth="2" />
+            <line x1="90" y1="46" x2="90" y2="100" stroke="#d1d5db" strokeWidth="2" />
+            <line x1="90" y1="46" x2="150" y2="100" stroke="#d1d5db" strokeWidth="2" />
+            {/* Pulses */}
+            <circle className="cloud-pulse-svg cloud-pulse-svg-0" r="5" fill="#38bdf8" filter="url(#glow)" >
+              <animate attributeName="cx" values="90;30" keyTimes="0;1" dur="2.5s" repeatCount="indefinite" />
+              <animate attributeName="cy" values="46;100" keyTimes="0;1" dur="2.5s" repeatCount="indefinite" />
+            </circle>
+            <circle className="cloud-pulse-svg cloud-pulse-svg-1" r="5" fill="#38bdf8" filter="url(#glow)">
+              <animate attributeName="cx" values="90;90" keyTimes="0;1" dur="2.5s" repeatCount="indefinite" begin="0.3s" />
+              <animate attributeName="cy" values="46;100" keyTimes="0;1" dur="2.5s" repeatCount="indefinite" begin="0.3s" />
+            </circle>
+            <circle className="cloud-pulse-svg cloud-pulse-svg-2" r="5" fill="#38bdf8" filter="url(#glow)">
+              <animate attributeName="cx" values="90;150" keyTimes="0;1" dur="2.5s" repeatCount="indefinite" begin="0.6s" />
+              <animate attributeName="cy" values="46;100" keyTimes="0;1" dur="2.5s" repeatCount="indefinite" begin="0.6s" />
+            </circle>
+            {/* Server boxes at endpoints */}
+            <g>
+              {/* Left server */}
+              <rect x="12" y="100" width="36" height="20" rx="6" fill="#f8fafc" stroke="#cbd5e1" strokeWidth="2" />
+              {/* Center server */}
+              <rect x="72" y="100" width="36" height="20" rx="6" fill="#f8fafc" stroke="#cbd5e1" strokeWidth="2" />
+              {/* Right server */}
+              <rect x="132" y="100" width="36" height="20" rx="6" fill="#f8fafc" stroke="#cbd5e1" strokeWidth="2" />
+              {/* Minimal server grid icon for each */}
+              {/* Left grid */}
+              <g>
+                <rect x="22" y="104" width="6" height="6" rx="1" fill="#d1d5db"/>
+                <rect x="30" y="104" width="6" height="6" rx="1" fill="#d1d5db"/>
+                <rect x="22" y="112" width="6" height="6" rx="1" fill="#d1d5db"/>
+                <rect x="30" y="112" width="6" height="6" rx="1" fill="#d1d5db"/>
+              </g>
+              {/* Center grid */}
+              <g>
+                <rect x="82" y="104" width="6" height="6" rx="1" fill="#d1d5db"/>
+                <rect x="90" y="104" width="6" height="6" rx="1" fill="#d1d5db"/>
+                <rect x="82" y="112" width="6" height="6" rx="1" fill="#d1d5db"/>
+                <rect x="90" y="112" width="6" height="6" rx="1" fill="#d1d5db"/>
+              </g>
+              {/* Right grid */}
+              <g>
+                <rect x="142" y="104" width="6" height="6" rx="1" fill="#d1d5db"/>
+                <rect x="150" y="104" width="6" height="6" rx="1" fill="#d1d5db"/>
+                <rect x="142" y="112" width="6" height="6" rx="1" fill="#d1d5db"/>
+                <rect x="150" y="112" width="6" height="6" rx="1" fill="#d1d5db"/>
+              </g>
+            </g>
+            <defs>
+              <filter id="glow" x="-20" y="-20" width="60" height="60">
+                <feGaussianBlur stdDeviation="4" result="coloredBlur"/>
+                <feMerge>
+                  <feMergeNode in="coloredBlur"/>
+                  <feMergeNode in="SourceGraphic"/>
+                </feMerge>
+              </filter>
+            </defs>
+          </svg>
+        </div>
         </motion.div>
       
         {/* Right Panel */}
