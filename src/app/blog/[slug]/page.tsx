@@ -3,6 +3,17 @@
 import { useState, useEffect } from 'react'
 import { useParams } from 'next/navigation'
 import Link from 'next/link'
+import ReactMarkdown from 'react-markdown'
+import remarkGfm from 'remark-gfm'
+import remarkBreaks from 'remark-breaks'
+import rehypeRaw from 'rehype-raw'
+import remarkMath from 'remark-math'
+import rehypeKatex from 'rehype-katex'
+import rehypeHighlight from 'rehype-highlight'
+import rehypeSlug from 'rehype-slug'
+import rehypeAutolinkHeadings from 'rehype-autolink-headings'
+import 'katex/dist/katex.min.css'
+import 'highlight.js/styles/github.css'
 
 interface BlogPost {
   id: string
@@ -100,10 +111,23 @@ export default function BlogPostPage() {
             </div>
           </header>
           
-          <div 
-            className="prose prose-lg max-w-none dark:prose-invert prose-headings:text-gray-900 dark:prose-headings:text-white prose-p:text-gray-700 dark:prose-p:text-gray-300"
-            dangerouslySetInnerHTML={{ __html: post.content }}
-          />
+          {/* Markdown Content */}
+          <div className="prose prose-lg max-w-none dark:prose-invert prose-headings:text-gray-900 dark:prose-headings:text-white prose-p:text-gray-700 dark:prose-p:text-gray-300">
+            <ReactMarkdown
+              remarkPlugins={[remarkGfm, remarkBreaks, remarkMath]}
+              rehypePlugins={[rehypeRaw, rehypeKatex, rehypeHighlight, rehypeSlug, rehypeAutolinkHeadings]}
+              components={{
+                h1: ({node, ...props}) => <h1 className="text-4xl mb-6 mt-10 text-black font-extrabold" style={{fontFamily: 'inherit'}} {...props} />,
+                h2: ({node, ...props}) => <h2 className="text-3xl mb-5 mt-8 text-gray-800 font-bold" style={{fontFamily: 'inherit'}} {...props} />,
+                h3: ({node, ...props}) => <h3 className="text-2xl mb-4 mt-6 text-gray-700 font-semibold" style={{fontFamily: 'inherit'}} {...props} />,
+                h4: ({node, ...props}) => <h4 className="text-xl mb-3 mt-5 text-gray-600 font-medium" style={{fontFamily: 'inherit'}} {...props} />,
+                h5: ({node, ...props}) => <h5 className="text-lg mb-2 mt-4 text-gray-500 font-medium" style={{fontFamily: 'inherit'}} {...props} />,
+                h6: ({node, ...props}) => <h6 className="text-base mb-1 mt-3 text-gray-400 font-medium uppercase tracking-wider" style={{fontFamily: 'inherit'}} {...props} />,
+              }}
+            >
+              {post.content}
+            </ReactMarkdown>
+          </div>
         </article>
 
         {/* Navigation */}

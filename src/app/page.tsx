@@ -4,6 +4,17 @@ import Link from 'next/link'
 import { useState, useEffect, useRef, useLayoutEffect } from 'react'
 import { motion, useScroll, useTransform, useInView } from 'framer-motion'
 import React from 'react' // Added for React.Fragment
+import ReactMarkdown from 'react-markdown'
+import remarkGfm from 'remark-gfm'
+import remarkBreaks from 'remark-breaks'
+import rehypeRaw from 'rehype-raw'
+import remarkMath from 'remark-math'
+import rehypeKatex from 'rehype-katex'
+import rehypeHighlight from 'rehype-highlight'
+import rehypeSlug from 'rehype-slug'
+import rehypeAutolinkHeadings from 'rehype-autolink-headings'
+import 'katex/dist/katex.min.css'
+import 'highlight.js/styles/github.css'
 
 interface BlogPost {
   id: string
@@ -60,14 +71,14 @@ export default function Home() {
     <div ref={containerRef} className="min-h-screen bg-gray-50 dark:bg-gray-900">
       {/* Main Blog Section */}
       <motion.div 
-        className="min-h-screen flex"
+        className="min-h-screen flex items-stretch"
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ duration: 0.8 }}
       >
         {/* Left Panel */}
         <motion.div 
-          className="w-1/2 bg-white dark:bg-gray-800 p-8 flex flex-col justify-between relative"
+          className="w-1/2 bg-white dark:bg-gray-800 p-8 flex flex-col justify-between relative h-screen"
           initial={{ x: -100, opacity: 0 }}
           animate={{ x: 0, opacity: 1 }}
           transition={{ duration: 0.8, delay: 0.2 }}
@@ -102,7 +113,7 @@ export default function Home() {
           </motion.div>
         
         {/* Compact, unified SVG for cloud, lines, pulses, and servers */}
-        <div className="flex justify-center items-center mt-16 mb-8" style={{ minHeight: 260 }}>
+        <div className="flex justify-center items-center mt-8 mb-4" style={{ minHeight: 260 }}>
           <svg
             width="300"
             height="220"
@@ -187,7 +198,7 @@ export default function Home() {
       
         {/* Right Panel */}
         <motion.div 
-          className="w-1/2 p-8"
+          className="w-1/2 p-8 h-screen"
           initial={{ x: 100, opacity: 0 }}
           animate={{ x: 0, opacity: 1 }}
           transition={{ duration: 0.8, delay: 0.3 }}
@@ -225,9 +236,23 @@ export default function Home() {
               }).replace(',', '—')}</span>
             </div>
             
-            <p className="text-gray-700 dark:text-gray-300 leading-relaxed mb-6">
-              {latestPost.excerpt || latestPost.content.replace(/<[^>]*>/g, '').substring(0, 200) + '...'}
-            </p>
+            {/* Markdown Preview for Featured Article */}
+            <div className="prose prose-sm max-w-none dark:prose-invert prose-headings:text-gray-900 dark:prose-headings:text-white prose-p:text-gray-700 dark:prose-p:text-gray-300 mb-2">
+              <ReactMarkdown
+                remarkPlugins={[remarkGfm, remarkBreaks, remarkMath]}
+                rehypePlugins={[rehypeRaw, rehypeKatex, rehypeHighlight, rehypeSlug, rehypeAutolinkHeadings]}
+                components={{
+                  h1: ({node, ...props}) => <h1 className="text-2xl mb-2 mt-2 text-black font-extrabold" style={{fontFamily: 'inherit'}} {...props} />, 
+                  h2: ({node, ...props}) => <h2 className="text-xl mb-1 mt-1 text-gray-800 font-bold" style={{fontFamily: 'inherit'}} {...props} />, 
+                  h3: ({node, ...props}) => <h3 className="text-lg mb-1 mt-1 text-gray-700 font-semibold" style={{fontFamily: 'inherit'}} {...props} />, 
+                  h4: ({node, ...props}) => <h4 className="text-base mb-1 mt-1 text-gray-600 font-medium" style={{fontFamily: 'inherit'}} {...props} />, 
+                  h5: ({node, ...props}) => <h5 className="text-sm mb-1 mt-1 text-gray-500 font-medium" style={{fontFamily: 'inherit'}} {...props} />, 
+                  h6: ({node, ...props}) => <h6 className="text-xs mb-1 mt-1 text-gray-400 font-medium uppercase tracking-wider" style={{fontFamily: 'inherit'}} {...props} />,
+                }}
+              >
+                {(latestPost?.excerpt || latestPost?.content?.substring(0, 200) + '...') ?? ''}
+              </ReactMarkdown>
+            </div>
             
             <Link 
               href={`/blog/${latestPost.slug}`}
@@ -287,6 +312,27 @@ export default function Home() {
               <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-3">
                 {post.title}
               </h3>
+              <div className="flex items-center text-sm text-gray-600 dark:text-gray-400 mb-4">
+                <span className="font-medium">{post.author}</span>
+                <span className="mx-2">•</span>
+                <span>{new Date(post.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }).replace(',', '—')}</span>
+              </div>
+              <div className="prose prose-sm max-w-none dark:prose-invert prose-headings:text-gray-900 dark:prose-headings:text-white prose-p:text-gray-700 dark:prose-p:text-gray-300 mb-2 line-clamp-3 overflow-hidden" style={{display: '-webkit-box', WebkitLineClamp: 3, WebkitBoxOrient: 'vertical'}}>
+                <ReactMarkdown
+                  remarkPlugins={[remarkGfm, remarkBreaks, remarkMath]}
+                  rehypePlugins={[rehypeRaw, rehypeKatex, rehypeHighlight, rehypeSlug, rehypeAutolinkHeadings]}
+                  components={{
+                    h1: ({node, ...props}) => <h1 className="text-2xl mb-2 mt-2 text-black font-extrabold" style={{fontFamily: 'inherit'}} {...props} />, 
+                    h2: ({node, ...props}) => <h2 className="text-xl mb-1 mt-1 text-gray-800 font-bold" style={{fontFamily: 'inherit'}} {...props} />, 
+                    h3: ({node, ...props}) => <h3 className="text-lg mb-1 mt-1 text-gray-700 font-semibold" style={{fontFamily: 'inherit'}} {...props} />, 
+                    h4: ({node, ...props}) => <h4 className="text-base mb-1 mt-1 text-gray-600 font-medium" style={{fontFamily: 'inherit'}} {...props} />, 
+                    h5: ({node, ...props}) => <h5 className="text-sm mb-1 mt-1 text-gray-500 font-medium" style={{fontFamily: 'inherit'}} {...props} />, 
+                    h6: ({node, ...props}) => <h6 className="text-xs mb-1 mt-1 text-gray-400 font-medium uppercase tracking-wider" style={{fontFamily: 'inherit'}} {...props} />,
+                  }}
+                >
+                  {(post.excerpt || post.content?.substring(0, 200) + '...') ?? ''}
+                </ReactMarkdown>
+              </div>
               <Link 
                 href={`/blog/${post.slug}`}
                 className="text-blue-600 dark:text-blue-400 hover:underline"

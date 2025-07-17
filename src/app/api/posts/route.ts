@@ -36,6 +36,10 @@ export async function POST(request: NextRequest) {
     
     posts.unshift(newPost)
     
+    // TEMPORARY MEMORY SAFEGUARD: Limit in-memory posts to 100 for stability.
+    // Remove this block when switching to a real database or after testing.
+    if (posts.length > 100) posts.pop();
+    
     return NextResponse.json({ 
       success: true, 
       id: newPost.id,

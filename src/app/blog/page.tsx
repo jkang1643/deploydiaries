@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
+import Timeline from '../../components/Timeline';
 
 interface BlogPost {
   id: string
@@ -17,6 +18,7 @@ interface BlogPost {
 export default function BlogPage() {
   const [posts, setPosts] = useState<BlogPost[]>([])
   const [loading, setLoading] = useState(true)
+  const [timelineSelection, setTimelineSelection] = useState<{ year: string; month: string } | null>(null);
 
   useEffect(() => {
     const fetchPosts = async () => {
@@ -33,6 +35,16 @@ export default function BlogPage() {
 
     fetchPosts()
   }, [])
+
+  // Filter posts for All Articles based on timeline selection
+  const filteredPosts = timelineSelection
+    ? posts.filter(post => {
+        const date = new Date(post.date);
+        const year = date.getFullYear().toString();
+        const month = (date.getMonth() + 1).toString().padStart(2, '0');
+        return year === timelineSelection.year && month === timelineSelection.month;
+      })
+    : posts;
 
   if (loading) {
     return (
@@ -85,8 +97,8 @@ export default function BlogPage() {
             </Link>
           </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {posts.map((post) => (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-16">
+            {posts.slice(0, 3).map((post) => (
               <article
                 key={post.id}
                 className="bg-white dark:bg-gray-800 rounded-lg shadow-md hover:shadow-lg transition-shadow overflow-hidden"
@@ -123,6 +135,64 @@ export default function BlogPage() {
             ))}
           </div>
         )}
+
+        {/* All Articles Section with Timeline */}
+        <section className="flex flex-col md:flex-row gap-8">
+          <div className="md:w-3/4 w-full order-1 md:order-none">
+            <h2 className="text-4xl font-extrabold text-gray-900 dark:text-white mb-8 text-left">All Articles</h2>
+            <div className="grid grid-cols-1 gap-8">
+              {filteredPosts.map((post) => (
+                <article
+                  key={post.id + '-all'}
+                  className="bg-white dark:bg-gray-800 rounded-lg shadow-md hover:shadow-lg transition-shadow overflow-hidden"
+                >
+                  {post.images && post.images.length > 0 && (
+                    <div className="h-48 bg-gradient-to-r from-blue-400 to-purple-500"></div>
+                  )}
+                  <div className="p-6">
+                    <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-3 line-clamp-2">
+                      {post.title}
+                    </h2>
+                    <div className="flex items-center text-sm text-gray-600 dark:text-gray-400 mb-4">
+                      <span className="font-medium">{post.author}</span>
+                      <span className="mx-2">•</span>
+                      <span>{new Date(post.date).toLocaleDateString()}</span>
+                    </div>
+                    {post.excerpt && (
+                      <p className="text-gray-700 dark:text-gray-300 mb-4 line-clamp-3">
+                        {post.excerpt}
+                      </p>
+                    )}
+                    <Link
+                      href={`/blog/${post.slug}`}
+                      className="text-blue-600 dark:text-blue-400 hover:underline font-medium"
+                    >
+                      Read more →
+                    </Link>
+                  </div>
+                </article>
+              ))}
+              {filteredPosts.length === 0 && (
+                <div className="col-span-full text-gray-500 text-center py-8">No articles found for this month.</div>
+              )}
+            </div>
+          </div>
+          <aside className="md:w-1/4 w-full md:pl-8 order-2 md:order-none">
+            <Timeline
+              posts={posts}
+              onSelect={(year, month) => setTimelineSelection({ year, month })}
+              selected={timelineSelection}
+            />
+            {timelineSelection && (
+              <button
+                className="mt-2 text-xs text-gray-500 hover:underline"
+                onClick={() => setTimelineSelection(null)}
+              >
+                Clear filter
+              </button>
+            )}
+          </aside>
+        </section>
       </main>
     </div>
   )
