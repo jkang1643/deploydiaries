@@ -20,18 +20,19 @@ interface BlogPost {
   id: string
   title: string
   author: string
-  date: string
   content: string
   excerpt?: string
   images?: string[]
   slug: string
+  createdAt: string
+  previewImage?: string
 }
 
 export default function Home() {
   const [latestPost, setLatestPost] = useState<BlogPost | null>(null)
   const [recentPosts, setRecentPosts] = useState<BlogPost[]>([])
-  const containerRef = useRef<HTMLDivElement>(null)
-  const aboutRef = useRef<HTMLDivElement>(null)
+  const containerRef = useRef<HTMLDivElement | null>(null)
+  const aboutRef = useRef<HTMLDivElement | null>(null)
   const { scrollYProgress } = useScroll({ target: containerRef })
   const aboutInView = useInView(aboutRef, { once: true, margin: "-100px" })
 
@@ -53,10 +54,10 @@ export default function Home() {
   }, [])
 
   // --- Cloud/Server Animation with dynamic alignment ---
-  const cloudRef = useRef(null);
+  const cloudRef = useRef<HTMLDivElement | null>(null);
   const [cloudBase, setCloudBase] = useState({ x: 128, y: 80 });
   useLayoutEffect(() => {
-    if (cloudRef.current) {
+    if (cloudRef.current && cloudRef.current.parentElement) {
       const rect = cloudRef.current.getBoundingClientRect();
       const parentRect = cloudRef.current.parentElement.getBoundingClientRect();
       setCloudBase({
@@ -78,7 +79,7 @@ export default function Home() {
       >
         {/* Left Panel */}
         <motion.div 
-          className="w-1/2 bg-white dark:bg-gray-800 p-8 flex flex-col justify-between relative h-screen"
+          className="w-1/2 bg-white dark:bg-gray-800 p-8 pb-12 flex flex-col justify-between relative h-screen"
           initial={{ x: -100, opacity: 0 }}
           animate={{ x: 0, opacity: 1 }}
           transition={{ duration: 0.8, delay: 0.2 }}
@@ -198,7 +199,7 @@ export default function Home() {
       
         {/* Right Panel */}
         <motion.div 
-          className="w-1/2 p-8 h-screen"
+          className="w-1/2 p-8 pb-12"
           initial={{ x: 100, opacity: 0 }}
           animate={{ x: 0, opacity: 1 }}
           transition={{ duration: 0.8, delay: 0.3 }}
@@ -229,7 +230,7 @@ export default function Home() {
             <div className="flex items-center text-gray-600 dark:text-gray-400 mb-6">
               <span className="font-medium">{latestPost.author}</span>
               <span className="mx-2">•</span>
-              <span>{new Date(latestPost.date).toLocaleDateString('en-US', { 
+              <span>{new Date(latestPost.createdAt).toLocaleDateString('en-US', { 
                 month: 'short', 
                 day: 'numeric',
                 year: 'numeric'
@@ -315,7 +316,7 @@ export default function Home() {
               <div className="flex items-center text-sm text-gray-600 dark:text-gray-400 mb-4">
                 <span className="font-medium">{post.author}</span>
                 <span className="mx-2">•</span>
-                <span>{new Date(post.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }).replace(',', '—')}</span>
+                <span>{new Date(post.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }).replace(',', '—')}</span>
               </div>
               <div className="prose prose-sm max-w-none dark:prose-invert prose-headings:text-gray-900 dark:prose-headings:text-white prose-p:text-gray-700 dark:prose-p:text-gray-300 mb-2 line-clamp-3 overflow-hidden" style={{display: '-webkit-box', WebkitLineClamp: 3, WebkitBoxOrient: 'vertical'}}>
                 <ReactMarkdown

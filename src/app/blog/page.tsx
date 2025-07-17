@@ -8,11 +8,11 @@ interface BlogPost {
   id: string
   title: string
   author: string
-  date: string
   content: string
   excerpt?: string
   images?: string[]
   slug: string
+  createdAt: string
 }
 
 export default function BlogPage() {
@@ -39,9 +39,9 @@ export default function BlogPage() {
   // Filter posts for All Articles based on timeline selection
   const filteredPosts = timelineSelection
     ? posts.filter(post => {
-        const date = new Date(post.date);
-        const year = date.getFullYear().toString();
-        const month = (date.getMonth() + 1).toString().padStart(2, '0');
+        const dateObj = new Date(post.createdAt);
+        const year = dateObj.getFullYear().toString();
+        const month = (dateObj.getMonth() + 1).toString().padStart(2, '0');
         return year === timelineSelection.year && month === timelineSelection.month;
       })
     : posts;
@@ -115,7 +115,7 @@ export default function BlogPage() {
                   <div className="flex items-center text-sm text-gray-600 dark:text-gray-400 mb-4">
                     <span className="font-medium">{post.author}</span>
                     <span className="mx-2">•</span>
-                    <span>{new Date(post.date).toLocaleDateString()}</span>
+                    <span>{new Date(post.createdAt).toLocaleDateString()}</span>
                   </div>
                   
                   {post.excerpt && (
@@ -156,7 +156,7 @@ export default function BlogPage() {
                     <div className="flex items-center text-sm text-gray-600 dark:text-gray-400 mb-4">
                       <span className="font-medium">{post.author}</span>
                       <span className="mx-2">•</span>
-                      <span>{new Date(post.date).toLocaleDateString()}</span>
+                      <span>{new Date(post.createdAt).toLocaleDateString()}</span>
                     </div>
                     {post.excerpt && (
                       <p className="text-gray-700 dark:text-gray-300 mb-4 line-clamp-3">

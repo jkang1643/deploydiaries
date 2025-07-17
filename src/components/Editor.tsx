@@ -2,6 +2,8 @@
 
 import React, { useState } from "react";
 import dynamic from "next/dynamic";
+import "@uiw/react-md-editor/markdown-editor.css";
+import "@uiw/react-markdown-preview/markdown.css";
 
 const MDEditor = dynamic(() => import("@uiw/react-md-editor"), { ssr: false });
 
@@ -9,6 +11,15 @@ interface EditorProps {
   content?: string;
   onChange?: (content: string) => void;
 }
+
+// Custom style for blue links in markdown preview
+const markdownPreviewStyle = `
+  .wmde-markdown a,
+  .wmde-markdown a:visited {
+    color: #2563eb !important; /* Tailwind blue-600 */
+    text-decoration: underline !important;
+  }
+`;
 
 export default function Editor({ content = "", onChange }: EditorProps) {
   const [title, setTitle] = useState("");
@@ -89,6 +100,7 @@ export default function Editor({ content = "", onChange }: EditorProps) {
         />
         {/* Markdown Editor */}
         <div className="mb-6">
+          <style>{markdownPreviewStyle}</style>
           <MDEditor
             value={markdown}
             onChange={(val) => {
@@ -98,6 +110,7 @@ export default function Editor({ content = "", onChange }: EditorProps) {
             height={400}
           />
         </div>
+        {/* Table of Contents (ToC) is not currently supported in this editor. To enable ToC, consider using a remark plugin like 'remark-toc' and pass it to the remarkPlugins prop if supported. */}
         {/* Publish Button */}
         <div className="mt-6 flex justify-end">
           <button

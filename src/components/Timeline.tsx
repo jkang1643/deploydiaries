@@ -4,11 +4,11 @@ interface BlogPost {
   id: string;
   title: string;
   author: string;
-  date: string;
   content: string;
   excerpt?: string;
   images?: string[];
   slug: string;
+  createdAt: string;
 }
 
 interface TimelineProps {
@@ -20,7 +20,7 @@ interface TimelineProps {
 function groupPostsByYearMonth(posts: BlogPost[]) {
   const grouped: Record<string, Record<string, BlogPost[]>> = {};
   posts.forEach(post => {
-    const date = new Date(post.date);
+    const date = new Date(post.createdAt);
     const year = date.getFullYear().toString();
     const month = (date.getMonth() + 1).toString().padStart(2, '0');
     if (!grouped[year]) grouped[year] = {};

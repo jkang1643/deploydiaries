@@ -24,6 +24,7 @@ interface BlogPost {
   excerpt?: string
   images?: string[]
   slug: string
+  createdAt?: string
 }
 
 export default function BlogPostPage() {
@@ -107,7 +108,7 @@ export default function BlogPostPage() {
             <div className="flex items-center text-gray-600 dark:text-gray-400">
               <span className="font-medium">{post.author}</span>
               <span className="mx-2">•</span>
-              <span>{new Date(post.date).toLocaleDateString()}</span>
+              <span>{post.createdAt ? new Date(post.createdAt).toLocaleDateString() : ''}</span>
             </div>
           </header>
           
@@ -123,6 +124,7 @@ export default function BlogPostPage() {
                 h4: ({node, ...props}) => <h4 className="text-xl mb-3 mt-5 text-gray-600 font-medium" style={{fontFamily: 'inherit'}} {...props} />,
                 h5: ({node, ...props}) => <h5 className="text-lg mb-2 mt-4 text-gray-500 font-medium" style={{fontFamily: 'inherit'}} {...props} />,
                 h6: ({node, ...props}) => <h6 className="text-base mb-1 mt-3 text-gray-400 font-medium uppercase tracking-wider" style={{fontFamily: 'inherit'}} {...props} />,
+                a: ({node, ...props}) => <a className="text-blue-600 dark:text-blue-400 underline hover:text-blue-800 dark:hover:text-blue-300 transition-colors" {...props} />,
               }}
             >
               {post.content}
