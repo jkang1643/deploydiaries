@@ -1,0 +1,7 @@
+# Default folders you want to ignore
+node_modules/
+.next/
+dist/
+
+# ⛔ EXPLICITLY allow .env.local
+!.env.local

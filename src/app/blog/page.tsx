@@ -3,6 +3,9 @@
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import Timeline from '../../components/Timeline';
+import LoginModal from '../../components/LoginModal';
+import { auth } from '../../lib/firebase';
+import { onAuthStateChanged } from 'firebase/auth';
 
 interface BlogPost {
   id: string
@@ -19,6 +22,8 @@ export default function BlogPage() {
   const [posts, setPosts] = useState<BlogPost[]>([])
   const [loading, setLoading] = useState(true)
   const [timelineSelection, setTimelineSelection] = useState<{ year: string; month: string } | null>(null);
+  const [user, setUser] = useState<any>(null);
+  const [showLogin, setShowLogin] = useState(false);
 
   useEffect(() => {
     const fetchPosts = async () => {
@@ -35,6 +40,13 @@ export default function BlogPage() {
 
     fetchPosts()
   }, [])
+
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, (firebaseUser) => {
+      setUser(firebaseUser);
+    });
+    return () => unsubscribe();
+  }, []);
 
   // Filter posts for All Articles based on timeline selection
   const filteredPosts = timelineSelection
@@ -68,12 +80,43 @@ export default function BlogPage() {
                 Modernist — Culture, identity, and ideas
               </p>
             </div>
-            <Link
-              href="/write"
-              className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors"
-            >
-              Write Article
-            </Link>
+            <div className="flex items-center gap-4">
+              {user ? (
+                <span className="text-gray-700 dark:text-gray-200 text-sm">{user.email}</span>
+              ) : null}
+              {/* Show Write Article and Manage Articles buttons only for the authorized user */}
+              {user && user.email === 'jkang1643@gmail.com' && (
+                <>
+                  <button
+                    className="px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-base font-semibold transition-colors shadow-md"
+                    onClick={() => window.location.href = '/write'}
+                  >
+                    Write Article
+                  </button>
+                  <button
+                    className="px-6 py-3 bg-purple-600 hover:bg-purple-700 text-white rounded-lg text-base font-semibold transition-colors shadow-md"
+                    onClick={() => window.location.href = '/manage'}
+                  >
+                    Manage Articles
+                  </button>
+                </>
+              )}
+              {user ? (
+                <button
+                  className="px-4 py-2 bg-gray-300 hover:bg-gray-400 text-gray-800 rounded text-base font-semibold transition-colors shadow"
+                  onClick={() => setShowLogin(true)}
+                >
+                  Logout
+                </button>
+              ) : (
+                <button
+                  className="px-6 py-3 bg-green-600 hover:bg-green-700 text-white rounded-lg text-base font-semibold transition-colors shadow-md"
+                  onClick={() => setShowLogin(true)}
+                >
+                  Login
+                </button>
+              )}
+            </div>
           </div>
         </div>
       </header>
@@ -89,12 +132,7 @@ export default function BlogPage() {
             <p className="text-gray-600 dark:text-gray-400 mb-4">
               No posts yet. Be the first to write an article!
             </p>
-            <Link
-              href="/write"
-              className="inline-block px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors"
-            >
-              Write First Article
-            </Link>
+            {/* Removed Write First Article button */}
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-16">
@@ -194,6 +232,12 @@ export default function BlogPage() {
           </aside>
         </section>
       </main>
+      <LoginModal
+        open={showLogin}
+        onClose={() => setShowLogin(false)}
+        onAuth={setUser}
+        user={user}
+      />
     </div>
   )
 }
