@@ -74,10 +74,10 @@ export default function BlogPage() {
           <div className="flex items-center justify-between">
             <div>
               <Link href="/" className="text-3xl font-bold text-gray-900 dark:text-white">
-                M
+                Deploy Diaries
               </Link>
               <p className="text-gray-600 dark:text-gray-400 mt-2">
-                Modernist — Culture, identity, and ideas
+                A builder's notebook from the edge of the cloud.
               </p>
             </div>
             <div className="flex items-center gap-4">
@@ -87,12 +87,6 @@ export default function BlogPage() {
               {/* Show Write Article and Manage Articles buttons only for the authorized user */}
               {user && user.email === 'jkang1643@gmail.com' && (
                 <>
-                  <button
-                    className="px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-base font-semibold transition-colors shadow-md"
-                    onClick={() => window.location.href = '/write'}
-                  >
-                    Write Article
-                  </button>
                   <button
                     className="px-6 py-3 bg-purple-600 hover:bg-purple-700 text-white rounded-lg text-base font-semibold transition-colors shadow-md"
                     onClick={() => window.location.href = '/manage'}
@@ -157,7 +151,7 @@ export default function BlogPage() {
                   </div>
                   
                   {post.excerpt && (
-                    <p className="text-gray-700 dark:text-gray-300 mb-4 line-clamp-3">
+                    <p className="text-gray-700 dark:text-gray-300 mb-4 line-clamp-4 h-24 overflow-hidden">
                       {post.excerpt}
                     </p>
                   )}
@@ -197,7 +191,7 @@ export default function BlogPage() {
                       <span>{new Date(post.createdAt).toLocaleDateString()}</span>
                     </div>
                     {post.excerpt && (
-                      <p className="text-gray-700 dark:text-gray-300 mb-4 line-clamp-3">
+                      <p className="text-gray-700 dark:text-gray-300 mb-4 line-clamp-4 h-24 overflow-hidden">
                         {post.excerpt}
                       </p>
                     )}

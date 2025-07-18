@@ -27,13 +27,16 @@ export default function ManagePage() {
   const [editSlug, setEditSlug] = useState('');
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
+  const [currentUser, setCurrentUser] = useState<any>(null);
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
       if (user && user.email === 'jkang1643@gmail.com') {
         setAuthorized(true);
+        setCurrentUser(user);
       } else {
         setAuthorized(false);
+        setCurrentUser(null);
         router.replace('/blog');
       }
       setChecked(true);
@@ -61,10 +64,22 @@ export default function ManagePage() {
     }
   };
 
+  const getIdToken = async () => {
+    if (!currentUser) return null;
+    return await currentUser.getIdToken();
+  };
+
   const handleDelete = async (id: number) => {
     if (!confirm('Are you sure you want to delete this article?')) return;
     try {
-      const res = await fetch(`/api/posts/${id}`, { method: 'DELETE' });
+      const token = await getIdToken();
+      if (!token) throw new Error('No ID token');
+      const res = await fetch(`/api/posts/${id}`, {
+        method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+        },
+      });
       if (res.ok) {
         setArticles(articles.filter(a => a.id !== id));
       } else {
@@ -87,9 +102,14 @@ export default function ManagePage() {
     setSaving(true);
     setError('');
     try {
+      const token = await getIdToken();
+      if (!token) throw new Error('No ID token');
       const res = await fetch(`/api/posts/${editId}`, {
         method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
+        },
         body: JSON.stringify({
           title: editTitle,
           content: editContent,

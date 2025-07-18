@@ -87,12 +87,12 @@ export default function BlogPostPage() {
         <div className="max-w-4xl mx-auto px-6 py-6">
           <Link
             href="/blog"
-            className="text-blue-600 dark:text-blue-400 hover:underline mb-4 inline-block"
+            className="text-blue-600 dark:text-blue-400 hover:underline mb-4 inline-block mr-6"
           >
             ← Back to Blog
           </Link>
           <Link href="/" className="text-2xl font-bold text-gray-900 dark:text-white">
-            Modernist
+            Deploy Diaries
           </Link>
         </div>
       </header>
@@ -139,12 +139,6 @@ export default function BlogPostPage() {
             className="px-6 py-3 bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors"
           >
             ← All Posts
-          </Link>
-          <Link
-            href="/write"
-            className="px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors"
-          >
-            Write Article
           </Link>
         </div>
       </main>

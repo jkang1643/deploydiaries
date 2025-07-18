@@ -1,5 +1,23 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/posts'
+import { adminAuth } from '@/lib/firebaseAdmin'
+
+async function verifyRequestAuth(request: NextRequest) {
+  const authHeader = request.headers.get('authorization');
+  if (!authHeader || !authHeader.startsWith('Bearer ')) {
+    return null;
+  }
+  const idToken = authHeader.split(' ')[1];
+  try {
+    const decoded = await adminAuth.verifyIdToken(idToken);
+    if (decoded.email === 'jkang1643@gmail.com') {
+      return decoded;
+    }
+    return null;
+  } catch {
+    return null;
+  }
+}
 
 export async function GET(
   request: NextRequest,
@@ -28,11 +46,14 @@ export async function DELETE(
   request: NextRequest,
   { params }: { params: { id: string } }
 ) {
+  const user = await verifyRequestAuth(request);
+  if (!user) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  }
   try {
     const deleted = await prisma.article.delete({
       where: {
         id: Number.isNaN(Number(params.id)) ? undefined : Number(params.id),
-        // fallback to slug if id is not a number
         ...(Number.isNaN(Number(params.id)) && { slug: params.id })
       }
     });
@@ -46,6 +67,10 @@ export async function PUT(
   request: NextRequest,
   { params }: { params: { id: string } }
 ) {
+  const user = await verifyRequestAuth(request);
+  if (!user) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  }
   try {
     const body = await request.json();
     const { title, content, author, slug } = body;
