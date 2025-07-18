@@ -1,6 +1,7 @@
 "use client"
 
 import React, { useState } from "react";
+import Image from 'next/image';
 import dynamic from "next/dynamic";
 import "@uiw/react-md-editor/markdown-editor.css";
 import "@uiw/react-markdown-preview/markdown.css";
@@ -121,11 +122,12 @@ export default function Editor({
         />
         {localPreviewImage && (
           <div className="mb-6 flex justify-center">
-            <img
-              src={localPreviewImage}
-              alt="Preview"
-              className="max-h-48 rounded shadow border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800"
-              onError={(e) => (e.currentTarget.style.display = 'none')}
+            <Image 
+              src={localPreviewImage} 
+              alt={`Preview for ${localTitle}`}
+              className="w-full h-full object-cover"
+              width={600}
+              height={300}
             />
           </div>
         )}

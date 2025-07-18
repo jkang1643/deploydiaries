@@ -102,7 +102,7 @@ export default function StackEditEmbed({ initialMarkdown }: StackEditEmbedProps)
       } else {
         setPublishError("Failed to publish post");
       }
-    } catch (error) {
+    } catch {
       setPublishError("Error publishing post");
     } finally {
       setIsPublishing(false);
