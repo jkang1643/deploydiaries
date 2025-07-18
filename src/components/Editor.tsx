@@ -35,7 +35,7 @@ export default function Editor({
 }: EditorProps) {
   const [localTitle, setLocalTitle] = useState(title);
   const [localAuthor, setLocalAuthor] = useState(author);
-  const [localPreviewImage, setLocalPreviewImage] = useState(previewImage);
+  const [localPreviewImage, setLocalPreviewImage] = useState(previewImage ?? "");
   const [markdown, setMarkdown] = useState(content);
   const [isPublishing, setIsPublishing] = useState(false);
   const [publishError, setPublishError] = useState<string | null>(null);
@@ -102,32 +102,44 @@ export default function Editor({
             placeholder="Article Title"
             value={localTitle}
             onChange={(e) => setLocalTitle(e.target.value)}
-            className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white"
+            className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white text-lg"
           />
           <input
             type="text"
             placeholder="Author Name"
             value={localAuthor}
             onChange={(e) => setLocalAuthor(e.target.value)}
-            className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white"
+            className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white text-lg"
           />
         </div>
         <input
           type="text"
           placeholder="Preview Image URL (optional)"
-          value={localPreviewImage}
+          value={localPreviewImage ?? ""}
           onChange={(e) => setLocalPreviewImage(e.target.value)}
-          className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white mb-6"
+          className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white mb-6 text-lg"
         />
+        {localPreviewImage && (
+          <div className="mb-6 flex justify-center">
+            <img
+              src={localPreviewImage}
+              alt="Preview"
+              className="max-h-48 rounded shadow border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800"
+              onError={(e) => (e.currentTarget.style.display = 'none')}
+            />
+          </div>
+        )}
         {/* Markdown Editor */}
-        <div className="mb-6">
+        <div className="mb-6" style={{ maxWidth: 900, width: '100%', margin: '0 auto' }}>
           <style>{markdownPreviewStyle}</style>
           <MDEditor
             value={markdown}
             onChange={(val) => {
               setMarkdown(val || "");
             }}
-            height={400}
+            height={600}
+            previewOptions={{ style: { fontSize: '1.1rem' } }}
+            textareaProps={{ style: { fontSize: '1.1rem', minHeight: 400 } }}
           />
         </div>
         {/* Table of Contents (ToC) is not currently supported in this editor. To enable ToC, consider using a remark plugin like 'remark-toc' and pass it to the remarkPlugins prop if supported. */}

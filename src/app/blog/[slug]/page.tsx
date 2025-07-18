@@ -25,6 +25,7 @@ interface BlogPost {
   images?: string[]
   slug: string
   createdAt?: string
+  previewImage?: string
 }
 
 export default function BlogPostPage() {
@@ -100,6 +101,16 @@ export default function BlogPostPage() {
       {/* Article */}
       <main className="max-w-4xl mx-auto px-6 py-12">
         <article className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-8">
+          {post.previewImage && (
+            <div className="flex justify-center mb-8">
+              <img
+                src={post.previewImage}
+                alt={post.title}
+                className="max-h-72 w-full object-cover object-center rounded shadow border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800"
+                style={{ maxWidth: '100%' }}
+              />
+            </div>
+          )}
           <header className="mb-8">
             <h1 className="text-4xl font-bold text-gray-900 dark:text-white mb-4 leading-tight">
               {post.title}

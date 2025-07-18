@@ -18,4 +18,5 @@ model Article {
   slug      String   @unique
   createdAt DateTime @default(now())
   author    String
+  previewImage String?
 }

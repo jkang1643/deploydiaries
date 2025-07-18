@@ -297,17 +297,13 @@ export default function Home() {
                 transition={{ duration: 0.5, delay: 0.8 + index * 0.1 }}
                 whileHover={{ y: -5, transition: { duration: 0.2 } }}
               >
-              {post.previewImage ? (
+              {post.previewImage && (
                 <div className="w-full h-32 rounded mb-4 overflow-hidden">
                   <img 
                     src={post.previewImage} 
                     alt={`Preview for ${post.title}`}
                     className="w-full h-full object-cover"
                   />
-                </div>
-              ) : index === 1 && (
-                <div className="w-full h-32 bg-gradient-to-r from-blue-400 to-yellow-400 rounded mb-4 flex items-center justify-center">
-                  <div className="w-16 h-16 bg-orange-500 rounded-full"></div>
                 </div>
               )}
               <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-3">

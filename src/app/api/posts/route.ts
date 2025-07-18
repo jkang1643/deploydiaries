@@ -4,7 +4,16 @@ import { prisma } from '@/lib/posts'
 export async function GET() {
   try {
     const posts = await prisma.article.findMany({
-      orderBy: { createdAt: 'desc' }
+      orderBy: { createdAt: 'desc' },
+      select: {
+        id: true,
+        title: true,
+        author: true,
+        content: true,
+        slug: true,
+        createdAt: true,
+        previewImage: true,
+      },
     });
     return NextResponse.json({ posts });
   } catch (error) {
@@ -16,7 +25,7 @@ export async function GET() {
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json()
-    const { title, author, content } = body
+    const { title, author, content, previewImage } = body
 
     if (!title || !author || !content) {
       return NextResponse.json(
@@ -35,8 +44,18 @@ export async function POST(request: NextRequest) {
         title,
         author,
         content,
-        slug
-      }
+        slug,
+        previewImage: previewImage || null,
+      },
+      select: {
+        id: true,
+        title: true,
+        author: true,
+        content: true,
+        slug: true,
+        createdAt: true,
+        previewImage: true,
+      },
     })
 
     return NextResponse.json({

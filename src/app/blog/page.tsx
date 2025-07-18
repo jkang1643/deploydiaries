@@ -16,6 +16,7 @@ interface BlogPost {
   images?: string[]
   slug: string
   createdAt: string
+  previewImage?: string; // Added previewImage to the interface
 }
 
 export default function BlogPage() {
@@ -141,9 +142,15 @@ export default function BlogPage() {
                 key={post.id}
                 className="bg-white dark:bg-gray-800 rounded-lg shadow-md hover:shadow-lg transition-shadow overflow-hidden"
               >
-                {post.images && post.images.length > 0 && (
+                {post.previewImage ? (
+                  <img
+                    src={post.previewImage}
+                    alt={post.title}
+                    className="w-full h-48 object-cover object-center bg-gray-100 dark:bg-gray-900"
+                  />
+                ) : post.images && post.images.length > 0 ? (
                   <div className="h-48 bg-gradient-to-r from-blue-400 to-purple-500"></div>
-                )}
+                ) : null}
                 
                 <div className="p-6">
                   <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-3 line-clamp-2">
@@ -184,9 +191,15 @@ export default function BlogPage() {
                   key={post.id + '-all'}
                   className="bg-white dark:bg-gray-800 rounded-lg shadow-md hover:shadow-lg transition-shadow overflow-hidden"
                 >
-                  {post.images && post.images.length > 0 && (
+                  {post.previewImage ? (
+                    <img
+                      src={post.previewImage}
+                      alt={post.title}
+                      className="w-full h-48 object-cover object-center bg-gray-100 dark:bg-gray-900"
+                    />
+                  ) : post.images && post.images.length > 0 ? (
                     <div className="h-48 bg-gradient-to-r from-blue-400 to-purple-500"></div>
-                  )}
+                  ) : null}
                   <div className="p-6">
                     <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-3 line-clamp-2">
                       {post.title}
