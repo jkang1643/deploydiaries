@@ -31,7 +31,9 @@ const Mermaid: React.FC<MermaidProps> = ({ chart }) => {
             ref.current!.innerHTML = svgCode;
           });
         } catch (err) {
-          ref.current.innerHTML = `<pre style='color:red'>Mermaid render error:\n${err}</pre>`;
+          if (ref.current) {
+            ref.current.innerHTML = `<pre style='color:red'>Mermaid render error:\n${err}</pre>`;
+          }
         }
       });
     }
