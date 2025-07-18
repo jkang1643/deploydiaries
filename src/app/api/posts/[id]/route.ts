@@ -19,15 +19,14 @@ async function verifyRequestAuth(request: NextRequest) {
   }
 }
 
-export async function GET(
-  request: NextRequest,
-  { params }: { params: { id: string } }
-) {
+export async function GET(request: NextRequest) {
+  const { pathname } = new URL(request.url);
+  const id = pathname.split("/").pop();
   const post = await prisma.article.findFirst({
     where: {
       OR: [
-        { id: Number.isNaN(Number(params.id)) ? undefined : Number(params.id) },
-        { slug: params.id }
+        { id: Number.isNaN(Number(id)) ? undefined : Number(id) },
+        { slug: id }
       ]
     }
   })
@@ -42,10 +41,9 @@ export async function GET(
   return NextResponse.json({ post })
 }
 
-export async function DELETE(
-  request: NextRequest,
-  { params }: { params: { id: string } }
-) {
+export async function DELETE(request: NextRequest) {
+  const { pathname } = new URL(request.url);
+  const id = pathname.split("/").pop();
   const user = await verifyRequestAuth(request);
   if (!user) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
@@ -53,8 +51,8 @@ export async function DELETE(
   try {
     const deleted = await prisma.article.delete({
       where: {
-        id: Number.isNaN(Number(params.id)) ? undefined : Number(params.id),
-        ...(Number.isNaN(Number(params.id)) && { slug: params.id })
+        id: Number.isNaN(Number(id)) ? undefined : Number(id),
+        ...(Number.isNaN(Number(id)) && { slug: id })
       }
     });
     return NextResponse.json({ success: true, deleted });
@@ -63,10 +61,9 @@ export async function DELETE(
   }
 }
 
-export async function PUT(
-  request: NextRequest,
-  { params }: { params: { id: string } }
-) {
+export async function PUT(request: NextRequest) {
+  const { pathname } = new URL(request.url);
+  const id = pathname.split("/").pop();
   const user = await verifyRequestAuth(request);
   if (!user) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
@@ -76,8 +73,8 @@ export async function PUT(
     const { title, content, author, slug } = body;
     const updated = await prisma.article.update({
       where: {
-        id: Number.isNaN(Number(params.id)) ? undefined : Number(params.id),
-        ...(Number.isNaN(Number(params.id)) && { slug: params.id })
+        id: Number.isNaN(Number(id)) ? undefined : Number(id),
+        ...(Number.isNaN(Number(id)) && { slug: id })
       },
       data: { title, content, author, slug }
     });
