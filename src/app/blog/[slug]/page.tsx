@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import { useParams } from 'next/navigation'
 import Link from 'next/link'
+import Image from 'next/image'
 import ReactMarkdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
 import remarkBreaks from 'remark-breaks'
@@ -43,7 +44,7 @@ export default function BlogPostPage() {
         }
         const data = await response.json()
         setPost(data.post)
-      } catch (error) {
+      } catch {
         setError('Post not found')
       } finally {
         setLoading(false)
@@ -103,11 +104,12 @@ export default function BlogPostPage() {
         <article className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-8">
           {post.previewImage && (
             <div className="flex justify-center mb-8">
-              <img
-                src={post.previewImage}
-                alt={post.title}
-                className="max-h-72 w-full object-cover object-center rounded shadow border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800"
-                style={{ maxWidth: '100%' }}
+              <Image 
+                src={post.previewImage} 
+                alt={`Preview for ${post.title}`}
+                className="w-full h-full object-cover"
+                width={600}
+                height={300}
               />
             </div>
           )}
@@ -129,12 +131,12 @@ export default function BlogPostPage() {
               remarkPlugins={[remarkGfm, remarkBreaks, remarkMath]}
               rehypePlugins={[rehypeRaw, rehypeKatex, rehypeHighlight, rehypeSlug, rehypeAutolinkHeadings]}
               components={{
-                h1: ({node, ...props}) => <h1 className="text-4xl mb-6 mt-10 text-black font-extrabold" style={{fontFamily: 'inherit'}} {...props} />,
-                h2: ({node, ...props}) => <h2 className="text-3xl mb-5 mt-8 text-gray-800 font-bold" style={{fontFamily: 'inherit'}} {...props} />,
-                h3: ({node, ...props}) => <h3 className="text-2xl mb-4 mt-6 text-gray-700 font-semibold" style={{fontFamily: 'inherit'}} {...props} />,
-                h4: ({node, ...props}) => <h4 className="text-xl mb-3 mt-5 text-gray-600 font-medium" style={{fontFamily: 'inherit'}} {...props} />,
-                h5: ({node, ...props}) => <h5 className="text-lg mb-2 mt-4 text-gray-500 font-medium" style={{fontFamily: 'inherit'}} {...props} />,
-                h6: ({node, ...props}) => <h6 className="text-base mb-1 mt-3 text-gray-400 font-medium uppercase tracking-wider" style={{fontFamily: 'inherit'}} {...props} />,
+                h1: (props) => <h1 className="text-4xl mb-6 mt-10 text-black font-extrabold" style={{fontFamily: 'inherit'}} {...props} />, 
+                h2: (props) => <h2 className="text-3xl mb-5 mt-8 text-gray-800 font-bold" style={{fontFamily: 'inherit'}} {...props} />, 
+                h3: (props) => <h3 className="text-2xl mb-4 mt-6 text-gray-700 font-semibold" style={{fontFamily: 'inherit'}} {...props} />, 
+                h4: (props) => <h4 className="text-base mb-1 mt-1 text-gray-600 font-medium" style={{fontFamily: 'inherit'}} {...props} />, 
+                h5: (props) => <h5 className="text-sm mb-1 mt-1 text-gray-500 font-medium" style={{fontFamily: 'inherit'}} {...props} />, 
+                h6: (props) => <h6 className="text-xs mb-1 mt-1 text-gray-400 font-medium uppercase tracking-wider" style={{fontFamily: 'inherit'}} {...props} />, 
                 a: ({node, ...props}) => <a className="text-blue-600 dark:text-blue-400 underline hover:text-blue-800 dark:hover:text-blue-300 transition-colors" {...props} />,
               }}
             >

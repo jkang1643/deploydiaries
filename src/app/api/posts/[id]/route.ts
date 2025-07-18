@@ -56,7 +56,7 @@ export async function DELETE(request: NextRequest) {
       }
     });
     return NextResponse.json({ success: true, deleted });
-  } catch (error) {
+  } catch {
     return NextResponse.json({ error: 'Failed to delete article' }, { status: 400 });
   }
 }
@@ -79,7 +79,7 @@ export async function PUT(request: NextRequest) {
       data: { title, content, author, slug }
     });
     return NextResponse.json({ success: true, updated });
-  } catch (error) {
+  } catch {
     return NextResponse.json({ error: 'Failed to update article' }, { status: 400 });
   }
 }

@@ -16,7 +16,7 @@ export async function GET() {
       },
     });
     return NextResponse.json({ posts });
-  } catch (error) {
+  } catch {
     console.error('Error fetching posts:', error);
     return NextResponse.json({ posts: [], error: 'Database error' }, { status: 500 });
   }
