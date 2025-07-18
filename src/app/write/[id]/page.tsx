@@ -64,7 +64,7 @@ export default function EditWritePage() {
 
   const getIdToken = async () => {
     if (!currentUser) return null;
-    return await (currentUser as any).getIdToken();
+    return await (currentUser as unknown as string);
   };
 
   const handleSave = async ({ title, author, content, previewImage }: { title: string; author: string; content: string; previewImage?: string }) => {
