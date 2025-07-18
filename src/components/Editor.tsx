@@ -83,8 +83,8 @@ export default function Editor({
           setPublishError('Failed to publish post');
         }
       }
-    } catch (error) {
-      setPublishError('Error saving post');
+    } catch {
+      setPublishError('Error publishing post');
     } finally {
       setIsPublishing(false);
     }

@@ -5,7 +5,6 @@ import { useRouter, useParams } from "next/navigation";
 import { onAuthStateChanged } from "firebase/auth";
 import { auth } from "@/lib/firebase";
 import Editor from "@/components/Editor";
-import type { FC } from "react";
 
 interface Post {
   id: number;
@@ -25,7 +24,7 @@ export default function EditWritePage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [post, setPost] = useState<Post | null>(null);
-  const [currentUser, setCurrentUser] = useState<any>(null);
+  const [currentUser, setCurrentUser] = useState<unknown>(null);
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
@@ -56,7 +55,7 @@ export default function EditWritePage() {
       if (!res.ok) throw new Error("Failed to fetch post");
       const data = await res.json();
       setPost(data.post);
-    } catch (err) {
+    } catch {
       setError("Failed to fetch post");
     } finally {
       setLoading(false);
@@ -65,7 +64,7 @@ export default function EditWritePage() {
 
   const getIdToken = async () => {
     if (!currentUser) return null;
-    return await currentUser.getIdToken();
+    return await (currentUser as any).getIdToken();
   };
 
   const handleSave = async ({ title, author, content, previewImage }: { title: string; author: string; content: string; previewImage?: string }) => {
@@ -91,7 +90,7 @@ export default function EditWritePage() {
       } else {
         setError("Failed to update post");
       }
-    } catch (err) {
+    } catch {
       setError("Failed to update post");
     }
   };
