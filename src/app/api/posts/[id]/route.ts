@@ -20,35 +20,44 @@ async function verifyRequestAuth(request: NextRequest) {
 }
 
 export async function GET(request: NextRequest) {
-  const { pathname } = new URL(request.url);
-  const id = pathname.split("/").pop();
-  const post = await prisma.article.findFirst({
-    where: {
-      OR: [
-        { id: Number.isNaN(Number(id)) ? undefined : Number(id) },
-        { slug: id }
-      ]
-    }
-  })
+  try {
+    const { pathname } = new URL(request.url);
+    const id = pathname.split("/").pop();
+    const post = await prisma.article.findFirst({
+      where: {
+        OR: [
+          { id: Number.isNaN(Number(id)) ? undefined : Number(id) },
+          { slug: id }
+        ]
+      }
+    })
 
-  if (!post) {
+    if (!post) {
+      return NextResponse.json(
+        { error: 'Post not found' },
+        { status: 404 }
+      )
+    }
+
+    return NextResponse.json({ post })
+  } catch (error) {
+    console.error('Database error:', error);
     return NextResponse.json(
-      { error: 'Post not found' },
-      { status: 404 }
+      { error: 'Database error' },
+      { status: 500 }
     )
   }
-
-  return NextResponse.json({ post })
 }
 
 export async function DELETE(request: NextRequest) {
-  const { pathname } = new URL(request.url);
-  const id = pathname.split("/").pop();
-  const user = await verifyRequestAuth(request);
-  if (!user) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-  }
   try {
+    const { pathname } = new URL(request.url);
+    const id = pathname.split("/").pop();
+    const user = await verifyRequestAuth(request);
+    if (!user) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+    
     const deleted = await prisma.article.delete({
       where: {
         id: Number.isNaN(Number(id)) ? undefined : Number(id),
@@ -56,19 +65,21 @@ export async function DELETE(request: NextRequest) {
       }
     });
     return NextResponse.json({ success: true, deleted });
-  } catch {
+  } catch (error) {
+    console.error('Delete error:', error);
     return NextResponse.json({ error: 'Failed to delete article' }, { status: 400 });
   }
 }
 
 export async function PUT(request: NextRequest) {
-  const { pathname } = new URL(request.url);
-  const id = pathname.split("/").pop();
-  const user = await verifyRequestAuth(request);
-  if (!user) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-  }
   try {
+    const { pathname } = new URL(request.url);
+    const id = pathname.split("/").pop();
+    const user = await verifyRequestAuth(request);
+    if (!user) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+    
     const body = await request.json();
     const { title, content, author, slug } = body;
     const updated = await prisma.article.update({
@@ -79,7 +90,8 @@ export async function PUT(request: NextRequest) {
       data: { title, content, author, slug }
     });
     return NextResponse.json({ success: true, updated });
-  } catch {
+  } catch (error) {
+    console.error('Update error:', error);
     return NextResponse.json({ error: 'Failed to update article' }, { status: 400 });
   }
 }
