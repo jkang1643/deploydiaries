@@ -93,6 +93,12 @@ export default function BlogPage() {
                   >
                     Manage Articles
                   </button>
+                  <button
+                    className="px-6 py-3 bg-green-600 hover:bg-green-700 text-white rounded-lg text-base font-semibold transition-colors shadow-md"
+                    onClick={() => window.location.href = '/write'}
+                  >
+                    Write Article
+                  </button>
                 </>
               )}
               {user ? (

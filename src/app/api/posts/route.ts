@@ -2,10 +2,15 @@ import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/posts'
 
 export async function GET() {
-  const posts = await prisma.article.findMany({
-    orderBy: { createdAt: 'desc' }
-  });
-  return NextResponse.json({ posts })
+  try {
+    const posts = await prisma.article.findMany({
+      orderBy: { createdAt: 'desc' }
+    });
+    return NextResponse.json({ posts });
+  } catch (error) {
+    console.error('Error fetching posts:', error);
+    return NextResponse.json({ posts: [], error: 'Database error' }, { status: 500 });
+  }
 }
 
 export async function POST(request: NextRequest) {
