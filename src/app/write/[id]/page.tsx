@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useRouter, useParams } from "next/navigation";
-import { onAuthStateChanged } from "firebase/auth";
+import { onAuthStateChanged, User } from "firebase/auth";
 import { auth } from "@/lib/firebase";
 import Editor from "@/components/Editor";
 
@@ -24,7 +24,7 @@ export default function EditWritePage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [post, setPost] = useState<Post | null>(null);
-  const [currentUser, setCurrentUser] = useState<unknown>(null);
+  const [currentUser, setCurrentUser] = useState<User | null>(null);
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
@@ -64,7 +64,7 @@ export default function EditWritePage() {
 
   const getIdToken = async () => {
     if (!currentUser) return null;
-    return await (currentUser as unknown as string);
+    return await currentUser.getIdToken();
   };
 
   const handleSave = async ({ title, author, content, previewImage }: { title: string; author: string; content: string; previewImage?: string }) => {
@@ -82,7 +82,6 @@ export default function EditWritePage() {
           author,
           content,
           previewImage: previewImage || null,
-          slug: post?.slug || undefined,
         }),
       });
       if (res.ok) {

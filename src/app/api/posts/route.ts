@@ -34,10 +34,29 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    const slug = title
+    // Generate base slug
+    const baseSlug = title
       .toLowerCase()
       .replace(/[^a-z0-9]+/g, '-')
       .replace(/(^-|-$)/g, '')
+
+    // Check if slug exists and generate unique slug
+    let slug = baseSlug
+    let counter = 1
+    
+    while (true) {
+      const existingArticle = await prisma.article.findUnique({
+        where: { slug }
+      })
+      
+      if (!existingArticle) {
+        break // Slug is unique, we can use it
+      }
+      
+      // Slug exists, try with a number suffix
+      slug = `${baseSlug}-${counter}`
+      counter++
+    }
 
     const newPost = await prisma.article.create({
       data: {
