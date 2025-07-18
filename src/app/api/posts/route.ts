@@ -17,7 +17,7 @@ export async function GET() {
     });
     return NextResponse.json({ posts });
   } catch {
-    console.error('Error fetching posts:', error);
+    console.error('Error fetching posts');
     return NextResponse.json({ posts: [], error: 'Database error' }, { status: 500 });
   }
 }
@@ -63,7 +63,7 @@ export async function POST(request: NextRequest) {
       id: newPost.id,
       post: newPost
     })
-  } catch (error) {
+  } catch {
     return NextResponse.json(
       { error: 'Invalid request body or database error' },
       { status: 400 }

@@ -2,10 +2,11 @@
 
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
+import Image from 'next/image'
 import Timeline from '../../components/Timeline';
 import LoginModal from '../../components/LoginModal';
 import { auth } from '../../lib/firebase';
-import { onAuthStateChanged } from 'firebase/auth';
+import { onAuthStateChanged, User } from 'firebase/auth';
 
 interface BlogPost {
   id: string
@@ -23,7 +24,7 @@ export default function BlogPage() {
   const [posts, setPosts] = useState<BlogPost[]>([])
   const [loading, setLoading] = useState(true)
   const [timelineSelection, setTimelineSelection] = useState<{ year: string; month: string } | null>(null);
-  const [user, setUser] = useState<any>(null);
+  const [user, setUser] = useState<User | null>(null);
   const [showLogin, setShowLogin] = useState(false);
 
   useEffect(() => {
@@ -78,7 +79,7 @@ export default function BlogPage() {
                 Deploy Diaries
               </Link>
               <p className="text-gray-600 dark:text-gray-400 mt-2">
-                A builder's notebook from the edge of the cloud.
+                A builder&apos;s notebook from the edge of the cloud.
               </p>
             </div>
             <div className="flex items-center gap-4">
@@ -143,9 +144,11 @@ export default function BlogPage() {
                 className="bg-white dark:bg-gray-800 rounded-lg shadow-md hover:shadow-lg transition-shadow overflow-hidden"
               >
                 {post.previewImage ? (
-                  <img
+                  <Image
                     src={post.previewImage}
                     alt={post.title}
+                    width={400}
+                    height={192}
                     className="w-full h-48 object-cover object-center bg-gray-100 dark:bg-gray-900"
                   />
                 ) : post.images && post.images.length > 0 ? (
@@ -192,9 +195,11 @@ export default function BlogPage() {
                   className="bg-white dark:bg-gray-800 rounded-lg shadow-md hover:shadow-lg transition-shadow overflow-hidden"
                 >
                   {post.previewImage ? (
-                    <img
+                    <Image
                       src={post.previewImage}
                       alt={post.title}
+                      width={400}
+                      height={192}
                       className="w-full h-48 object-cover object-center bg-gray-100 dark:bg-gray-900"
                     />
                   ) : post.images && post.images.length > 0 ? (

@@ -1,12 +1,12 @@
 import React, { useState } from 'react';
-import { signInWithEmailAndPassword, signOut } from 'firebase/auth';
+import { signInWithEmailAndPassword, signOut, User } from 'firebase/auth';
 import { auth } from '../lib/firebase';
 
 interface LoginModalProps {
   open: boolean;
   onClose: () => void;
-  onAuth: (user: any) => void;
-  user: any;
+  onAuth: (user: User | null) => void;
+  user: User | null;
 }
 
 const LoginModal: React.FC<LoginModalProps> = ({ open, onClose, onAuth, user }) => {
@@ -23,8 +23,8 @@ const LoginModal: React.FC<LoginModalProps> = ({ open, onClose, onAuth, user }) 
       const result = await signInWithEmailAndPassword(auth, email, password);
       onAuth(result.user);
       onClose();
-    } catch (err: any) {
-      setError(err.message || 'Login failed');
+    } catch (err: unknown) {
+      setError((err as Error).message || 'Login failed');
     } finally {
       setLoading(false);
     }
@@ -37,8 +37,8 @@ const LoginModal: React.FC<LoginModalProps> = ({ open, onClose, onAuth, user }) 
       await signOut(auth);
       onAuth(null);
       onClose();
-    } catch (err: any) {
-      setError(err.message || 'Logout failed');
+    } catch (err: unknown) {
+      setError((err as Error).message || 'Logout failed');
     } finally {
       setLoading(false);
     }

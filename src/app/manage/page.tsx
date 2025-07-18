@@ -2,9 +2,8 @@
 
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { onAuthStateChanged } from 'firebase/auth';
+import { onAuthStateChanged, User } from 'firebase/auth';
 import { auth } from '../../lib/firebase';
-import Link from 'next/link';
 
 interface Article {
   id: number;
@@ -21,14 +20,10 @@ export default function ManagePage() {
   const [checked, setChecked] = useState(false);
   const [articles, setArticles] = useState<Article[]>([]);
   const [loading, setLoading] = useState(true);
-  const [editId, setEditId] = useState<number | null>(null);
-  const [editTitle, setEditTitle] = useState('');
-  const [editContent, setEditContent] = useState('');
-  const [editAuthor, setEditAuthor] = useState('');
-  const [editSlug, setEditSlug] = useState('');
-  const [saving, setSaving] = useState(false);
+
+
   const [error, setError] = useState('');
-  const [currentUser, setCurrentUser] = useState<any>(null);
+  const [currentUser, setCurrentUser] = useState<User | null>(null);
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
@@ -49,7 +44,6 @@ export default function ManagePage() {
     if (authorized) {
       fetchArticles();
     }
-    // eslint-disable-next-line
   }, [authorized]);
 
   const fetchArticles = async () => {
@@ -58,7 +52,7 @@ export default function ManagePage() {
       const res = await fetch('/api/posts');
       const data = await res.json();
       setArticles(data.posts || []);
-    } catch (err) {
+    } catch {
       setError('Failed to fetch articles');
     } finally {
       setLoading(false);
@@ -86,7 +80,7 @@ export default function ManagePage() {
       } else {
         setError('Failed to delete article');
       }
-    } catch (err) {
+    } catch {
       setError('Failed to delete article');
     }
   };
@@ -95,37 +89,7 @@ export default function ManagePage() {
     router.push(`/write/${article.id}`);
   };
 
-  const handleSave = async () => {
-    setSaving(true);
-    setError('');
-    try {
-      const token = await getIdToken();
-      if (!token) throw new Error('No ID token');
-      const res = await fetch(`/api/posts/${editId}`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`,
-        },
-        body: JSON.stringify({
-          title: editTitle,
-          content: editContent,
-          author: editAuthor,
-          slug: editSlug,
-        }),
-      });
-      if (res.ok) {
-        setArticles(articles.map(a => a.id === editId ? { ...a, title: editTitle, content: editContent, author: editAuthor, slug: editSlug } : a));
-        setEditId(null);
-      } else {
-        setError('Failed to update article');
-      }
-    } catch (err) {
-      setError('Failed to update article');
-    } finally {
-      setSaving(false);
-    }
-  };
+
 
   if (!checked) {
     return <div className="min-h-screen flex items-center justify-center text-gray-600 dark:text-gray-300">Checking authorization...</div>;
@@ -157,26 +121,10 @@ export default function ManagePage() {
               {articles.map(article => (
                 <tr key={article.id} className="border-b">
                   <td className="py-2 px-3 align-top">
-                    {editId === article.id ? (
-                      <input
-                        className="w-full border rounded px-2 py-1"
-                        value={editTitle}
-                        onChange={e => setEditTitle(e.target.value)}
-                      />
-                    ) : (
-                      <span>{article.title}</span>
-                    )}
+                    <span>{article.title}</span>
                   </td>
                   <td className="py-2 px-3 align-top">
-                    {editId === article.id ? (
-                      <input
-                        className="w-full border rounded px-2 py-1"
-                        value={editAuthor}
-                        onChange={e => setEditAuthor(e.target.value)}
-                      />
-                    ) : (
-                      <span>{article.author}</span>
-                    )}
+                    <span>{article.author}</span>
                   </td>
                   <td className="py-2 px-3 align-top space-x-2">
                     <button

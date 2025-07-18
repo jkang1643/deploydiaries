@@ -1,8 +1,9 @@
 'use client'
 
 import Link from 'next/link'
-import { useState, useEffect, useRef, useLayoutEffect } from 'react'
-import { motion, useScroll, useTransform, useInView } from 'framer-motion'
+import Image from 'next/image'
+import { useState, useEffect, useRef } from 'react'
+import { motion, useInView } from 'framer-motion'
 import React from 'react' // Added for React.Fragment
 import ReactMarkdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
@@ -33,7 +34,7 @@ export default function Home() {
   const [recentPosts, setRecentPosts] = useState<BlogPost[]>([])
   const containerRef = useRef<HTMLDivElement | null>(null)
   const aboutRef = useRef<HTMLDivElement | null>(null)
-  const { scrollYProgress } = useScroll({ target: containerRef })
+
   const aboutInView = useInView(aboutRef, { once: true, margin: "-100px" })
 
   useEffect(() => {
@@ -53,20 +54,7 @@ export default function Home() {
     fetchPosts()
   }, [])
 
-  // --- Cloud/Server Animation with dynamic alignment ---
-  const cloudRef = useRef<HTMLDivElement | null>(null);
-  const [cloudBase, setCloudBase] = useState({ x: 128, y: 80 });
-  useLayoutEffect(() => {
-    if (cloudRef.current && cloudRef.current.parentElement) {
-      const rect = cloudRef.current.getBoundingClientRect();
-      const parentRect = cloudRef.current.parentElement.getBoundingClientRect();
-      setCloudBase({
-        x: rect.left + rect.width / 2 - parentRect.left,
-        y: rect.top + rect.height - parentRect.top
-      });
-    }
-  }, []);
-  // ---
+
 
   return (
     <div ref={containerRef} className="min-h-screen bg-gray-50 dark:bg-gray-900">
@@ -109,7 +97,7 @@ export default function Home() {
             transition={{ duration: 0.6, delay: 0.6 }}
           >
             <p className="text-gray-700 dark:text-gray-300 leading-relaxed mb-8">
-              A builder's notebook from the edge of the cloud. I document experiments, architectures, and lessons learned in the world of AWS — the good, the broken, and the beautifully optimized. Follow along as I turn trials into tutorials and concepts into code.
+              A builder&apos;s notebook from the edge of the cloud. I document experiments, architectures, and lessons learned in the world of AWS — the good, the broken, and the beautifully optimized. Follow along as I turn trials into tutorials and concepts into code.
             </p>
           </motion.div>
         
@@ -215,9 +203,11 @@ export default function Home() {
             >
             {latestPost.previewImage && (
               <div className="w-full h-48 rounded-lg mb-6 overflow-hidden">
-                <img 
+                <Image 
                   src={latestPost.previewImage} 
                   alt={`Preview for ${latestPost.title}`}
+                  width={400}
+                  height={192}
                   className="w-full h-full object-cover"
                 />
               </div>
@@ -243,12 +233,12 @@ export default function Home() {
                 remarkPlugins={[remarkGfm, remarkBreaks, remarkMath]}
                 rehypePlugins={[rehypeRaw, rehypeKatex, rehypeHighlight, rehypeSlug, rehypeAutolinkHeadings]}
                 components={{
-                  h1: ({node, ...props}) => <h1 className="text-2xl mb-2 mt-2 text-black font-extrabold" style={{fontFamily: 'inherit'}} {...props} />, 
-                  h2: ({node, ...props}) => <h2 className="text-xl mb-1 mt-1 text-gray-800 font-bold" style={{fontFamily: 'inherit'}} {...props} />, 
-                  h3: ({node, ...props}) => <h3 className="text-lg mb-1 mt-1 text-gray-700 font-semibold" style={{fontFamily: 'inherit'}} {...props} />, 
-                  h4: ({node, ...props}) => <h4 className="text-base mb-1 mt-1 text-gray-600 font-medium" style={{fontFamily: 'inherit'}} {...props} />, 
-                  h5: ({node, ...props}) => <h5 className="text-sm mb-1 mt-1 text-gray-500 font-medium" style={{fontFamily: 'inherit'}} {...props} />, 
-                  h6: ({node, ...props}) => <h6 className="text-xs mb-1 mt-1 text-gray-400 font-medium uppercase tracking-wider" style={{fontFamily: 'inherit'}} {...props} />,
+                  h1: ({...props}) => <h1 className="text-2xl mb-2 mt-2 text-black font-extrabold" style={{fontFamily: 'inherit'}} {...props} />, 
+                  h2: ({...props}) => <h2 className="text-xl mb-1 mt-1 text-gray-800 font-bold" style={{fontFamily: 'inherit'}} {...props} />, 
+                  h3: ({...props}) => <h3 className="text-lg mb-1 mt-1 text-gray-700 font-semibold" style={{fontFamily: 'inherit'}} {...props} />, 
+                  h4: ({...props}) => <h4 className="text-base mb-1 mt-1 text-gray-600 font-medium" style={{fontFamily: 'inherit'}} {...props} />, 
+                  h5: ({...props}) => <h5 className="text-sm mb-1 mt-1 text-gray-500 font-medium" style={{fontFamily: 'inherit'}} {...props} />, 
+                  h6: ({...props}) => <h6 className="text-xs mb-1 mt-1 text-gray-400 font-medium uppercase tracking-wider" style={{fontFamily: 'inherit'}} {...props} />,
                 }}
               >
                 {(latestPost?.excerpt || latestPost?.content?.substring(0, 200) + '...') ?? ''}
@@ -299,9 +289,11 @@ export default function Home() {
               >
               {post.previewImage && (
                 <div className="w-full h-32 rounded mb-4 overflow-hidden">
-                  <img 
+                  <Image 
                     src={post.previewImage} 
                     alt={`Preview for ${post.title}`}
+                    width={300}
+                    height={128}
                     className="w-full h-full object-cover"
                   />
                 </div>
@@ -319,12 +311,12 @@ export default function Home() {
                   remarkPlugins={[remarkGfm, remarkBreaks, remarkMath]}
                   rehypePlugins={[rehypeRaw, rehypeKatex, rehypeHighlight, rehypeSlug, rehypeAutolinkHeadings]}
                   components={{
-                    h1: ({node, ...props}) => <h1 className="text-2xl mb-2 mt-2 text-black font-extrabold" style={{fontFamily: 'inherit'}} {...props} />, 
-                    h2: ({node, ...props}) => <h2 className="text-xl mb-1 mt-1 text-gray-800 font-bold" style={{fontFamily: 'inherit'}} {...props} />, 
-                    h3: ({node, ...props}) => <h3 className="text-lg mb-1 mt-1 text-gray-700 font-semibold" style={{fontFamily: 'inherit'}} {...props} />, 
-                    h4: ({node, ...props}) => <h4 className="text-base mb-1 mt-1 text-gray-600 font-medium" style={{fontFamily: 'inherit'}} {...props} />, 
-                    h5: ({node, ...props}) => <h5 className="text-sm mb-1 mt-1 text-gray-500 font-medium" style={{fontFamily: 'inherit'}} {...props} />, 
-                    h6: ({node, ...props}) => <h6 className="text-xs mb-1 mt-1 text-gray-400 font-medium uppercase tracking-wider" style={{fontFamily: 'inherit'}} {...props} />,
+                    h1: ({...props}) => <h1 className="text-2xl mb-2 mt-2 text-black font-extrabold" style={{fontFamily: 'inherit'}} {...props} />, 
+                    h2: ({...props}) => <h2 className="text-xl mb-1 mt-1 text-gray-800 font-bold" style={{fontFamily: 'inherit'}} {...props} />, 
+                    h3: ({...props}) => <h3 className="text-lg mb-1 mt-1 text-gray-700 font-semibold" style={{fontFamily: 'inherit'}} {...props} />, 
+                    h4: ({...props}) => <h4 className="text-base mb-1 mt-1 text-gray-600 font-medium" style={{fontFamily: 'inherit'}} {...props} />, 
+                    h5: ({...props}) => <h5 className="text-sm mb-1 mt-1 text-gray-500 font-medium" style={{fontFamily: 'inherit'}} {...props} />, 
+                    h6: ({...props}) => <h6 className="text-xs mb-1 mt-1 text-gray-400 font-medium uppercase tracking-wider" style={{fontFamily: 'inherit'}} {...props} />,
                   }}
                 >
                   {(post.excerpt || post.content?.substring(0, 200) + '...') ?? ''}
@@ -439,7 +431,7 @@ export default function Home() {
             
             <div className="max-w-2xl mx-auto">
               <p className="text-lg text-gray-600 dark:text-gray-400 leading-relaxed mb-6">
-                I'm a cloud architect and developer passionate about creating scalable, 
+                I&apos;m a cloud architect and developer passionate about creating scalable, 
                 resilient systems in the AWS ecosystem. My journey spans from startup 
                 experimentation to enterprise-grade infrastructure.
               </p>

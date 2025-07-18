@@ -9,7 +9,7 @@ export default function ContactPage() {
           
           <div className="prose prose-lg max-w-none dark:prose-invert mb-8">
             <p className="text-gray-700 dark:text-gray-300 leading-relaxed">
-              We'd love to hear from you. Whether you have ideas to share, feedback to offer, or simply want to join the conversation building scalable architecture in the modern age.
+              We&apos;d love to hear from you. Whether you have ideas to share, feedback to offer, or simply want to join the conversation building scalable architecture in the modern age.
             </p>
           </div>
           
