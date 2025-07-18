@@ -32,5 +32,5 @@ export default function WritePage() {
     return null; // Will redirect
   }
 
-  return <Editor />;
+  return <Editor mode="create" />;
 }

@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { onAuthStateChanged } from 'firebase/auth';
 import { auth } from '../../lib/firebase';
+import Link from 'next/link';
 
 interface Article {
   id: number;
@@ -91,11 +92,7 @@ export default function ManagePage() {
   };
 
   const handleEdit = (article: Article) => {
-    setEditId(article.id);
-    setEditTitle(article.title);
-    setEditContent(article.content);
-    setEditAuthor(article.author);
-    setEditSlug(article.slug);
+    router.push(`/write/${article.id}`);
   };
 
   const handleSave = async () => {
@@ -182,39 +179,18 @@ export default function ManagePage() {
                     )}
                   </td>
                   <td className="py-2 px-3 align-top space-x-2">
-                    {editId === article.id ? (
-                      <>
-                        <button
-                          className="px-3 py-1 bg-green-600 hover:bg-green-700 text-white rounded text-sm"
-                          onClick={handleSave}
-                          disabled={saving}
-                        >
-                          {saving ? 'Saving...' : 'Save'}
-                        </button>
-                        <button
-                          className="px-3 py-1 bg-gray-400 hover:bg-gray-500 text-white rounded text-sm"
-                          onClick={() => setEditId(null)}
-                          disabled={saving}
-                        >
-                          Cancel
-                        </button>
-                      </>
-                    ) : (
-                      <>
-                        <button
-                          className="px-3 py-1 bg-blue-600 hover:bg-blue-700 text-white rounded text-sm"
-                          onClick={() => handleEdit(article)}
-                        >
-                          Edit
-                        </button>
-                        <button
-                          className="px-3 py-1 bg-red-600 hover:bg-red-700 text-white rounded text-sm"
-                          onClick={() => handleDelete(article.id)}
-                        >
-                          Delete
-                        </button>
-                      </>
-                    )}
+                    <button
+                      className="px-3 py-1 bg-blue-600 hover:bg-blue-700 text-white rounded text-sm"
+                      onClick={() => handleEdit(article)}
+                    >
+                      Edit
+                    </button>
+                    <button
+                      className="px-3 py-1 bg-red-600 hover:bg-red-700 text-white rounded text-sm"
+                      onClick={() => handleDelete(article.id)}
+                    >
+                      Delete
+                    </button>
                   </td>
                 </tr>
               ))}

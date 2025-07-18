@@ -8,8 +8,12 @@ import "@uiw/react-markdown-preview/markdown.css";
 const MDEditor = dynamic(() => import("@uiw/react-md-editor"), { ssr: false });
 
 interface EditorProps {
+  title?: string;
+  author?: string;
   content?: string;
-  onChange?: (content: string) => void;
+  previewImage?: string;
+  mode?: 'create' | 'edit';
+  onSave?: (data: { title: string; author: string; content: string; previewImage?: string }) => Promise<void> | void;
 }
 
 // Custom style for blue links in markdown preview
@@ -21,48 +25,65 @@ const markdownPreviewStyle = `
   }
 `;
 
-export default function Editor({ content = "", onChange }: EditorProps) {
-  const [title, setTitle] = useState("");
-  const [author, setAuthor] = useState("");
-  const [previewImage, setPreviewImage] = useState("");
+export default function Editor({
+  title = '',
+  author = '',
+  content = '',
+  previewImage = '',
+  mode = 'create',
+  onSave,
+}: EditorProps) {
+  const [localTitle, setLocalTitle] = useState(title);
+  const [localAuthor, setLocalAuthor] = useState(author);
+  const [localPreviewImage, setLocalPreviewImage] = useState(previewImage);
   const [markdown, setMarkdown] = useState(content);
   const [isPublishing, setIsPublishing] = useState(false);
   const [publishError, setPublishError] = useState<string | null>(null);
   const [publishSuccess, setPublishSuccess] = useState(false);
 
-  const publishPost = async () => {
-    if (!title || !author || !markdown) {
-      setPublishError("Please fill in all fields");
+  const handleSave = async () => {
+    if (!localTitle || !localAuthor || !markdown) {
+      setPublishError('Please fill in all fields');
       return;
     }
     setIsPublishing(true);
     setPublishError(null);
     setPublishSuccess(false);
     try {
-      const response = await fetch("/api/posts", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          title,
-          author,
+      if (onSave) {
+        await onSave({
+          title: localTitle,
+          author: localAuthor,
           content: markdown,
-          previewImage: previewImage || null,
-        }),
-      });
-      if (response.ok) {
+          previewImage: localPreviewImage || undefined,
+        });
         setPublishSuccess(true);
-        setTitle("");
-        setAuthor("");
-        setPreviewImage("");
-        setMarkdown("");
-        if (onChange) onChange("");
       } else {
-        setPublishError("Failed to publish post");
+        // fallback to create mode if no onSave provided
+        const response = await fetch('/api/posts', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            title: localTitle,
+            author: localAuthor,
+            content: markdown,
+            previewImage: localPreviewImage || null,
+          }),
+        });
+        if (response.ok) {
+          setPublishSuccess(true);
+          setLocalTitle('');
+          setLocalAuthor('');
+          setLocalPreviewImage('');
+          setMarkdown('');
+        } else {
+          setPublishError('Failed to publish post');
+        }
       }
     } catch (error) {
-      setPublishError("Error publishing post");
+      setPublishError('Error saving post');
     } finally {
       setIsPublishing(false);
     }
@@ -79,23 +100,23 @@ export default function Editor({ content = "", onChange }: EditorProps) {
           <input
             type="text"
             placeholder="Article Title"
-            value={title}
-            onChange={(e) => setTitle(e.target.value)}
+            value={localTitle}
+            onChange={(e) => setLocalTitle(e.target.value)}
             className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white"
           />
           <input
             type="text"
             placeholder="Author Name"
-            value={author}
-            onChange={(e) => setAuthor(e.target.value)}
+            value={localAuthor}
+            onChange={(e) => setLocalAuthor(e.target.value)}
             className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white"
           />
         </div>
         <input
           type="text"
           placeholder="Preview Image URL (optional)"
-          value={previewImage}
-          onChange={(e) => setPreviewImage(e.target.value)}
+          value={localPreviewImage}
+          onChange={(e) => setLocalPreviewImage(e.target.value)}
           className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white mb-6"
         />
         {/* Markdown Editor */}
@@ -105,7 +126,6 @@ export default function Editor({ content = "", onChange }: EditorProps) {
             value={markdown}
             onChange={(val) => {
               setMarkdown(val || "");
-              if (onChange) onChange(val || "");
             }}
             height={400}
           />
@@ -114,11 +134,11 @@ export default function Editor({ content = "", onChange }: EditorProps) {
         {/* Publish Button */}
         <div className="mt-6 flex justify-end">
           <button
-            onClick={publishPost}
+            onClick={handleSave}
             disabled={isPublishing}
             className="px-6 py-3 bg-blue-600 hover:bg-blue-700 disabled:bg-blue-400 text-white rounded-lg font-medium transition-colors"
           >
-            {isPublishing ? "Publishing..." : "Publish Article"}
+            {isPublishing ? (mode === 'edit' ? 'Saving...' : 'Publishing...') : (mode === 'edit' ? 'Save Changes' : 'Publish Article')}
           </button>
         </div>
         {publishError && <div className="text-red-600 mt-4">{publishError}</div>}
