@@ -41,6 +41,7 @@ export default function Editor({
   const [isPublishing, setIsPublishing] = useState(false);
   const [publishError, setPublishError] = useState<string | null>(null);
   const [publishSuccess, setPublishSuccess] = useState(false);
+  const [imageError, setImageError] = useState(false);
 
   const handleSave = async () => {
     if (!localTitle || !localAuthor || !markdown) {
@@ -123,7 +124,10 @@ export default function Editor({
             type="url"
             placeholder="https://example.com/image.jpg"
             value={localPreviewImage ?? ""}
-            onChange={(e) => setLocalPreviewImage(e.target.value)}
+            onChange={(e) => {
+              setLocalPreviewImage(e.target.value);
+              setImageError(false); // Reset error state when URL changes
+            }}
             className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white text-lg"
           />
         </div>
@@ -132,13 +136,41 @@ export default function Editor({
         {localPreviewImage && (
           <div className="mb-6 flex justify-center">
             <div className="relative w-full max-w-2xl">
-              <Image 
-                src={localPreviewImage} 
-                alt={`Preview for ${localTitle}`}
-                className="w-full h-64 object-cover rounded-lg"
-                width={600}
-                height={300}
-              />
+              <div className="mb-2 text-sm text-gray-600 dark:text-gray-400">
+                Preview Image URL: {localPreviewImage}
+              </div>
+              {!imageError ? (
+                <Image 
+                  src={localPreviewImage} 
+                  alt={`Preview for ${localTitle}`}
+                  className="w-full h-64 object-cover rounded-lg"
+                  width={600}
+                  height={300}
+                  onError={(e) => {
+                    console.error('Image failed to load:', localPreviewImage);
+                    console.error('Error event:', e);
+                    setImageError(true);
+                  }}
+                  onLoad={() => {
+                    console.log('Image loaded successfully:', localPreviewImage);
+                    setImageError(false);
+                  }}
+                />
+              ) : (
+                <div className="w-full h-64 bg-gray-200 dark:bg-gray-700 rounded-lg flex items-center justify-center">
+                  <div className="text-center">
+                    <div className="text-gray-500 dark:text-gray-400 mb-2">
+                      Image failed to load
+                    </div>
+                    <button
+                      onClick={() => setImageError(false)}
+                      className="text-blue-600 dark:text-blue-400 hover:underline text-sm"
+                    >
+                      Try again
+                    </button>
+                  </div>
+                </div>
+              )}
             </div>
           </div>
         )}

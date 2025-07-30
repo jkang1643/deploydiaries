@@ -14,52 +14,8 @@ import rehypeKatex from 'rehype-katex'
 import rehypeHighlight from 'rehype-highlight'
 import rehypeSlug from 'rehype-slug'
 import rehypeAutolinkHeadings from 'rehype-autolink-headings'
-import { Copy, Check } from 'lucide-react'
 import 'katex/dist/katex.min.css'
 import 'highlight.js/styles/github.css'
-
-// Custom Code Block Component with Copy Functionality
-const CodeBlock = ({ children, className, ...props }: React.ComponentProps<'pre'>) => {
-  const [copied, setCopied] = useState(false)
-  
-  const copyToClipboard = async () => {
-    try {
-      await navigator.clipboard.writeText(children as string)
-      setCopied(true)
-      setTimeout(() => setCopied(false), 2000)
-    } catch (err) {
-      console.error('Failed to copy: ', err)
-    }
-  }
-
-  return (
-    <div className="relative group my-6">
-      <div className="absolute top-3 right-3 z-10">
-        <button
-          onClick={copyToClipboard}
-          className="flex items-center gap-2 px-3 py-1 text-xs font-medium text-gray-500 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-md hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors opacity-0 group-hover:opacity-100"
-        >
-          {copied ? (
-            <>
-              <Check size={14} className="text-green-500" />
-              Copied!
-            </>
-          ) : (
-            <>
-              <Copy size={14} />
-              Copy
-            </>
-          )}
-        </button>
-      </div>
-      <pre className={`${className} bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg p-4 overflow-x-auto`}>
-        <code className={`${className} bg-transparent`} {...props}>
-          {children}
-        </code>
-      </pre>
-    </div>
-  )
-}
 
 // Custom Inline Code Component
 const InlineCode = ({ children, ...props }: React.ComponentProps<'code'>) => {
@@ -73,18 +29,6 @@ const InlineCode = ({ children, ...props }: React.ComponentProps<'code'>) => {
   )
 }
 
-// Custom Blockquote Component
-const Blockquote = ({ children, ...props }: React.ComponentProps<'blockquote'>) => {
-  return (
-    <blockquote 
-      className="border-l-4 border-gray-300 dark:border-gray-600 pl-6 py-4 my-6 bg-gray-50 dark:bg-gray-800 rounded-r-lg italic text-gray-700 dark:text-gray-300 text-lg leading-relaxed" 
-      {...props}
-    >
-      {children}
-    </blockquote>
-  )
-}
-
 interface BlogPost {
   id: string
   title: string
@@ -95,6 +39,12 @@ interface BlogPost {
   slug: string
   createdAt: string
   previewImage?: string
+}
+
+// Type for ReactMarkdown components
+interface MarkdownComponentProps {
+  children?: React.ReactNode
+  className?: string
 }
 
 export default function Home() {
@@ -263,14 +213,14 @@ export default function Home() {
           {/* Featured Article */}
           {latestPost ? (
             <motion.article 
-              className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-8 mb-8"
+              className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-8 mb-8 max-h-[450px] overflow-hidden flex flex-col"
               initial={{ y: 30, opacity: 0 }}
               animate={{ y: 0, opacity: 1 }}
               transition={{ duration: 0.6, delay: 0.5 }}
               whileHover={{ y: -5, transition: { duration: 0.2 } }}
             >
             {latestPost.previewImage && (
-              <div className="w-full h-48 rounded-lg mb-6 overflow-hidden">
+              <div className="w-full h-48 rounded-lg mb-6 overflow-hidden flex-shrink-0">
                 <Image 
                   src={latestPost.previewImage} 
                   alt={`Preview for ${latestPost.title}`}
@@ -281,11 +231,11 @@ export default function Home() {
               </div>
             )}
             
-            <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-4 leading-tight">
+            <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-4 leading-tight flex-shrink-0">
               {latestPost.title}
             </h1>
             
-            <div className="flex items-center text-gray-600 dark:text-gray-400 mb-6">
+            <div className="flex items-center text-gray-600 dark:text-gray-400 mb-6 flex-shrink-0">
               <span className="font-medium">{latestPost.author}</span>
               <span className="mx-2">•</span>
               <span>{new Date(latestPost.createdAt).toLocaleDateString('en-US', { 
@@ -296,38 +246,40 @@ export default function Home() {
             </div>
             
             {/* Markdown Preview for Featured Article */}
-            <div className="prose prose-sm max-w-none dark:prose-invert prose-headings:text-gray-900 dark:prose-headings:text-white prose-p:text-gray-700 dark:prose-p:text-gray-300 mb-2">
-              <ReactMarkdown
-                remarkPlugins={[remarkGfm, remarkBreaks, remarkMath]}
-                rehypePlugins={[rehypeRaw, rehypeKatex, rehypeHighlight, rehypeSlug, rehypeAutolinkHeadings]}
-                  components={{
-                    h1: ({...props}) => <h1 className="text-2xl mb-2 mt-2 text-black font-extrabold" style={{fontFamily: 'inherit'}} {...props} />, 
-                    h2: ({...props}) => <h2 className="text-xl mb-1 mt-1 text-gray-800 font-bold" style={{fontFamily: 'inherit'}} {...props} />, 
-                    h3: ({...props}) => <h3 className="text-lg mb-1 mt-1 text-gray-700 font-semibold" style={{fontFamily: 'inherit'}} {...props} />, 
-                    h4: ({...props}) => <h4 className="text-base mb-1 mt-1 text-gray-600 font-medium" style={{fontFamily: 'inherit'}} {...props} />, 
-                    h5: ({...props}) => <h5 className="text-sm mb-1 mt-1 text-gray-500 font-medium" style={{fontFamily: 'inherit'}} {...props} />, 
-                    h6: ({...props}) => <h6 className="text-xs mb-1 mt-1 text-gray-400 font-medium uppercase tracking-wider" style={{fontFamily: 'inherit'}} {...props} />,
-                    table: (props) => <table className="w-full border-collapse border border-gray-300 dark:border-gray-600 my-4" {...props} />,
-                    thead: (props) => <thead className="bg-gray-50 dark:bg-gray-700" {...props} />,
-                    tbody: (props) => <tbody className="divide-y divide-gray-200 dark:divide-gray-600" {...props} />,
-                    tr: (props) => <tr className="hover:bg-gray-50 dark:hover:bg-gray-600" {...props} />,
-                    th: (props) => <th className="border border-gray-300 dark:border-gray-600 px-4 py-2 text-left font-semibold text-gray-900 dark:text-gray-100" {...props} />,
-                    td: (props) => <td className="border border-gray-300 dark:border-gray-600 px-4 py-2 text-gray-700 dark:text-gray-300" {...props} />,
-                    pre: CodeBlock,
-                    code: InlineCode,
-                    ul: (props) => <ul className="list-disc list-inside space-y-1 my-4 text-gray-700 dark:text-gray-300" {...props} />,
-                    ol: (props) => <ol className="list-decimal list-outside space-y-1 my-4 text-gray-700 dark:text-gray-300 ml-4" {...props} />,
-                    li: (props) => <li className="text-gray-700 dark:text-gray-300" {...props} />,
-                    blockquote: Blockquote,
-                  }}
-              >
-                {(latestPost?.excerpt || latestPost?.content?.substring(0, 200) + '...') ?? ''}
-              </ReactMarkdown>
+            <div className="prose prose-sm max-w-none dark:prose-invert prose-headings:text-gray-900 dark:prose-headings:text-white prose-p:text-gray-700 dark:prose-p:text-gray-300 mb-4 flex-1 overflow-hidden">
+              <div className="line-clamp-3" style={{display: '-webkit-box', WebkitLineClamp: 3, WebkitBoxOrient: 'vertical'}}>
+                <ReactMarkdown
+                  remarkPlugins={[remarkGfm, remarkBreaks, remarkMath]}
+                  rehypePlugins={[rehypeRaw, rehypeKatex, rehypeHighlight, rehypeSlug, rehypeAutolinkHeadings]}
+                    components={{
+                      h1: ({children}: MarkdownComponentProps) => <p className="text-lg font-bold text-gray-900 dark:text-white mb-2" style={{fontFamily: 'inherit'}}>{children}</p>, 
+                      h2: ({children}: MarkdownComponentProps) => <p className="text-base font-semibold text-gray-800 dark:text-gray-200 mb-1" style={{fontFamily: 'inherit'}}>{children}</p>, 
+                      h3: ({children}: MarkdownComponentProps) => <p className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-1" style={{fontFamily: 'inherit'}}>{children}</p>, 
+                      h4: ({children}: MarkdownComponentProps) => <p className="text-sm font-medium text-gray-600 dark:text-gray-400 mb-1" style={{fontFamily: 'inherit'}}>{children}</p>, 
+                      h5: ({children}: MarkdownComponentProps) => <p className="text-xs font-medium text-gray-500 dark:text-gray-500 mb-1" style={{fontFamily: 'inherit'}}>{children}</p>, 
+                      h6: ({children}: MarkdownComponentProps) => <p className="text-xs font-medium text-gray-400 dark:text-gray-600 mb-1" style={{fontFamily: 'inherit'}}>{children}</p>, 
+                      table: () => <p className="text-gray-600 dark:text-gray-400 text-sm italic">[Table content]</p>,
+                      thead: ({children}: MarkdownComponentProps) => <span>{children}</span>,
+                      tbody: ({children}: MarkdownComponentProps) => <span>{children}</span>,
+                      tr: ({children}: MarkdownComponentProps) => <span>{children}</span>,
+                      th: ({children}: MarkdownComponentProps) => <span>{children}</span>,
+                      td: ({children}: MarkdownComponentProps) => <span>{children}</span>,
+                      pre: () => <p className="text-gray-600 dark:text-gray-400 text-sm italic">[Code block]</p>,
+                      code: InlineCode,
+                      ul: ({children}: MarkdownComponentProps) => <p className="text-gray-700 dark:text-gray-300 text-sm">{children}</p>,
+                      ol: ({children}: MarkdownComponentProps) => <p className="text-gray-700 dark:text-gray-300 text-sm">{children}</p>,
+                      li: ({children}: MarkdownComponentProps) => <span className="text-gray-700 dark:text-gray-300 text-sm">{children}</span>,
+                      blockquote: ({children}: MarkdownComponentProps) => <div className="text-gray-600 dark:text-gray-400 text-sm italic border-l-2 border-gray-300 dark:border-gray-600 pl-3">{children}</div>,
+                    }}
+                >
+                  {(latestPost?.excerpt || latestPost?.content?.substring(0, 200) + '...') ?? ''}
+                </ReactMarkdown>
+              </div>
             </div>
             
             <Link 
               href={`/blog/${latestPost.slug}`}
-              className="text-blue-600 dark:text-blue-400 hover:underline font-medium"
+              className="text-blue-600 dark:text-blue-400 hover:underline font-medium flex-shrink-0"
             >
               Read more
               </Link>
@@ -361,62 +313,55 @@ export default function Home() {
             {recentPosts.map((post, index) => (
               <motion.article 
                 key={post.id} 
-                className="bg-white dark:bg-gray-800 rounded-lg shadow p-6"
+                className="bg-white dark:bg-gray-800 rounded-lg shadow p-6 h-[224px] flex flex-col"
                 initial={{ y: 50, opacity: 0 }}
                 animate={{ y: 0, opacity: 1 }}
                 transition={{ duration: 0.5, delay: 0.8 + index * 0.1 }}
                 whileHover={{ y: -5, transition: { duration: 0.2 } }}
               >
-              {post.previewImage && (
-                <div className="w-full h-32 rounded mb-4 overflow-hidden">
-                  <Image 
-                    src={post.previewImage} 
-                    alt={`Preview for ${post.title}`}
-                    width={300}
-                    height={128}
-                    className="w-full h-full object-cover"
-                  />
-                </div>
-              )}
-              <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-3">
+
+              <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-3 flex-shrink-0 line-clamp-2" style={{display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', wordBreak: 'break-word', overflowWrap: 'break-word'}}>
                 {post.title}
               </h3>
-              <div className="flex items-center text-sm text-gray-600 dark:text-gray-400 mb-4">
+              <div className="flex items-center text-sm text-gray-600 dark:text-gray-400 mb-4 flex-shrink-0">
                 <span className="font-medium">{post.author}</span>
                 <span className="mx-2">•</span>
                 <span>{new Date(post.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }).replace(',', '—')}</span>
               </div>
-              <div className="prose prose-sm max-w-none dark:prose-invert prose-headings:text-gray-900 dark:prose-headings:text-white prose-p:text-gray-700 dark:prose-p:text-gray-300 mb-2 line-clamp-3 overflow-hidden" style={{display: '-webkit-box', WebkitLineClamp: 3, WebkitBoxOrient: 'vertical'}}>
-                <ReactMarkdown
-                  remarkPlugins={[remarkGfm, remarkBreaks, remarkMath]}
-                  rehypePlugins={[rehypeRaw, rehypeKatex, rehypeHighlight, rehypeSlug, rehypeAutolinkHeadings]}
-                  components={{
-                    h1: ({...props}) => <h1 className="text-2xl mb-2 mt-2 text-black font-extrabold" style={{fontFamily: 'inherit'}} {...props} />, 
-                    h2: ({...props}) => <h2 className="text-xl mb-1 mt-1 text-gray-800 font-bold" style={{fontFamily: 'inherit'}} {...props} />, 
-                    h3: ({...props}) => <h3 className="text-lg mb-1 mt-1 text-gray-700 font-semibold" style={{fontFamily: 'inherit'}} {...props} />, 
-                    h4: ({...props}) => <h4 className="text-base mb-1 mt-1 text-gray-600 font-medium" style={{fontFamily: 'inherit'}} {...props} />, 
-                    h5: ({...props}) => <h5 className="text-sm mb-1 mt-1 text-gray-500 font-medium" style={{fontFamily: 'inherit'}} {...props} />, 
-                    h6: ({...props}) => <h6 className="text-xs mb-1 mt-1 text-gray-400 font-medium uppercase tracking-wider" style={{fontFamily: 'inherit'}} {...props} />,
-                    table: (props) => <table className="w-full border-collapse border border-gray-300 dark:border-gray-600 my-4" {...props} />,
-                    thead: (props) => <thead className="bg-gray-50 dark:bg-gray-700" {...props} />,
-                    tbody: (props) => <tbody className="divide-y divide-gray-200 dark:divide-gray-600" {...props} />,
-                    tr: (props) => <tr className="hover:bg-gray-50 dark:hover:bg-gray-600" {...props} />,
-                    th: (props) => <th className="border border-gray-300 dark:border-gray-600 px-4 py-2 text-left font-semibold text-gray-900 dark:text-gray-100" {...props} />,
-                    td: (props) => <td className="border border-gray-300 dark:border-gray-600 px-4 py-2 text-gray-700 dark:text-gray-300" {...props} />,
-                    pre: CodeBlock,
-                    code: InlineCode,
-                    ul: (props) => <ul className="list-disc list-inside space-y-1 my-4 text-gray-700 dark:text-gray-300" {...props} />,
-                    ol: (props) => <ol className="list-decimal list-outside space-y-1 my-4 text-gray-700 dark:text-gray-300 ml-4" {...props} />,
-                    li: (props) => <li className="text-gray-700 dark:text-gray-300" {...props} />,
-                    blockquote: Blockquote,
-                  }}
-                >
-                  {(post.excerpt || post.content?.substring(0, 200) + '...') ?? ''}
-                </ReactMarkdown>
+              <div className="prose prose-sm max-w-none dark:prose-invert prose-headings:text-gray-900 dark:prose-headings:text-white prose-p:text-gray-700 dark:prose-p:text-gray-300 mb-4 flex-1 overflow-hidden">
+                <div className="line-clamp-4 text-sm leading-relaxed" style={{display: '-webkit-box', WebkitLineClamp: 4, WebkitBoxOrient: 'vertical', wordBreak: 'break-word'}}>
+                  <ReactMarkdown
+                    remarkPlugins={[remarkGfm, remarkBreaks, remarkMath]}
+                    rehypePlugins={[rehypeRaw, rehypeKatex, rehypeHighlight, rehypeSlug, rehypeAutolinkHeadings]}
+                    components={{
+                      h1: ({children}: MarkdownComponentProps) => <p className="text-lg font-bold text-gray-900 dark:text-white mb-2" style={{fontFamily: 'inherit'}}>{children}</p>, 
+                      h2: ({children}: MarkdownComponentProps) => <p className="text-base font-semibold text-gray-800 dark:text-gray-200 mb-1" style={{fontFamily: 'inherit'}}>{children}</p>, 
+                      h3: ({children}: MarkdownComponentProps) => <p className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-1" style={{fontFamily: 'inherit'}}>{children}</p>, 
+                      h4: ({children}: MarkdownComponentProps) => <p className="text-sm font-medium text-gray-600 dark:text-gray-400 mb-1" style={{fontFamily: 'inherit'}}>{children}</p>, 
+                      h5: ({children}: MarkdownComponentProps) => <p className="text-xs font-medium text-gray-500 dark:text-gray-500 mb-1" style={{fontFamily: 'inherit'}}>{children}</p>, 
+                      h6: ({children}: MarkdownComponentProps) => <p className="text-xs font-medium text-gray-400 dark:text-gray-600 mb-1" style={{fontFamily: 'inherit'}}>{children}</p>, 
+                      table: () => <p className="text-gray-600 dark:text-gray-400 text-sm italic">[Table content]</p>,
+                      thead: ({children}: MarkdownComponentProps) => <span>{children}</span>,
+                      tbody: ({children}: MarkdownComponentProps) => <span>{children}</span>,
+                      tr: ({children}: MarkdownComponentProps) => <span>{children}</span>,
+                      th: ({children}: MarkdownComponentProps) => <span>{children}</span>,
+                      td: ({children}: MarkdownComponentProps) => <span>{children}</span>,
+                      pre: () => <p className="text-gray-600 dark:text-gray-400 text-sm italic">[Code block]</p>,
+                      code: InlineCode,
+                      ul: ({children}: MarkdownComponentProps) => <p className="text-gray-700 dark:text-gray-300 text-sm">{children}</p>,
+                      ol: ({children}: MarkdownComponentProps) => <p className="text-gray-700 dark:text-gray-300 text-sm">{children}</p>,
+                      li: ({children}: MarkdownComponentProps) => <span className="text-gray-700 dark:text-gray-300 text-sm">{children}</span>,
+                      blockquote: ({children}: MarkdownComponentProps) => <div className="text-gray-600 dark:text-gray-400 text-sm italic border-l-2 border-gray-300 dark:border-gray-600 pl-3">{children}</div>,
+                      p: ({children}: MarkdownComponentProps) => <p className="text-gray-700 dark:text-gray-300 text-sm leading-relaxed" style={{wordBreak: 'break-word'}}>{children}</p>,
+                    }}
+                  >
+                    {(post.excerpt || post.content?.substring(0, 150) + '...') ?? ''}
+                  </ReactMarkdown>
+                </div>
               </div>
               <Link 
                 href={`/blog/${post.slug}`}
-                className="text-blue-600 dark:text-blue-400 hover:underline"
+                className="text-blue-600 dark:text-blue-400 hover:underline flex-shrink-0"
               >
                 Read more
                 </Link>
@@ -427,39 +372,47 @@ export default function Home() {
             {recentPosts.length === 0 && (
               <>
                 <motion.article 
-                  className="bg-white dark:bg-gray-800 rounded-lg shadow p-6"
+                  className="bg-white dark:bg-gray-800 rounded-lg shadow p-6 h-[224px] flex flex-col"
                   initial={{ y: 50, opacity: 0 }}
                   animate={{ y: 0, opacity: 1 }}
                   transition={{ duration: 0.5, delay: 0.8 }}
                   whileHover={{ y: -5, transition: { duration: 0.2 } }}
                 >
-                  <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-3">
+                  <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-3 flex-shrink-0 line-clamp-2" style={{display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', wordBreak: 'break-word', overflowWrap: 'break-word'}}>
                     Minimalism in the Age of Excess: Aesthetic or Ideology?
                   </h3>
+                  <div className="flex-1 overflow-hidden">
+                    <p className="text-gray-600 dark:text-gray-400 line-clamp-4" style={{display: '-webkit-box', WebkitLineClamp: 4, WebkitBoxOrient: 'vertical'}}>
+                      Exploring the intersection of design philosophy and lifestyle choices in our hyper-consumerist society...
+                    </p>
+                  </div>
                   <Link 
                     href="/blog/minimalism" 
-                    className="text-blue-600 dark:text-blue-400 hover:underline"
+                    className="text-blue-600 dark:text-blue-400 hover:underline flex-shrink-0 mt-4"
                   >
                     Read more
                   </Link>
                 </motion.article>
               
                 <motion.article 
-                  className="bg-white dark:bg-gray-800 rounded-lg shadow p-6"
+                  className="bg-white dark:bg-gray-800 rounded-lg shadow p-6 h-[224px] flex flex-col"
                   initial={{ y: 50, opacity: 0 }}
                   animate={{ y: 0, opacity: 1 }}
                   transition={{ duration: 0.5, delay: 0.9 }}
                   whileHover={{ y: -5, transition: { duration: 0.2 } }}
                 >
-                  <div className="w-full h-32 bg-gradient-to-r from-blue-400 to-yellow-400 rounded mb-4 flex items-center justify-center">
-                    <div className="w-16 h-16 bg-orange-500 rounded-full"></div>
-                  </div>
-                  <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-3">
+
+                  <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-3 flex-shrink-0 line-clamp-2" style={{display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', wordBreak: 'break-word', overflowWrap: 'break-word'}}>
                     Slow Thinking in a Fast World: Why Deep Reflection is a Radical Act
                   </h3>
+                  <div className="flex-1 overflow-hidden">
+                    <p className="text-gray-600 dark:text-gray-400 line-clamp-4" style={{display: '-webkit-box', WebkitLineClamp: 4, WebkitBoxOrient: 'vertical'}}>
+                      In an era of instant gratification and rapid information consumption, taking time to think deeply has become revolutionary...
+                    </p>
+                  </div>
                   <Link 
                     href="/blog/slow-thinking" 
-                    className="text-blue-600 dark:text-blue-400 hover:underline"
+                    className="text-blue-400 hover:underline flex-shrink-0 mt-4"
                   >
                     Read more
                   </Link>
