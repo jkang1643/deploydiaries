@@ -13,8 +13,65 @@ import rehypeKatex from 'rehype-katex'
 import rehypeHighlight from 'rehype-highlight'
 import rehypeSlug from 'rehype-slug'
 import rehypeAutolinkHeadings from 'rehype-autolink-headings'
+import { Copy, Check } from 'lucide-react'
 import 'katex/dist/katex.min.css'
 import 'highlight.js/styles/github.css'
+
+// Custom Code Block Component with Copy Functionality
+const CodeBlock = ({ children, className, ...props }: any) => {
+  const [copied, setCopied] = useState(false)
+  const language = className ? className.replace('language-', '') : ''
+  
+  const copyToClipboard = async () => {
+    try {
+      await navigator.clipboard.writeText(children)
+      setCopied(true)
+      setTimeout(() => setCopied(false), 2000)
+    } catch (err) {
+      console.error('Failed to copy: ', err)
+    }
+  }
+
+  return (
+    <div className="relative group my-6">
+      <div className="absolute top-3 right-3 z-10">
+        <button
+          onClick={copyToClipboard}
+          className="flex items-center gap-2 px-3 py-1 text-xs font-medium text-gray-500 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-md hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors opacity-0 group-hover:opacity-100"
+        >
+          {copied ? (
+            <>
+              <Check size={14} className="text-green-500" />
+              Copied!
+            </>
+          ) : (
+            <>
+              <Copy size={14} />
+              Copy
+            </>
+          )}
+        </button>
+      </div>
+      <pre className={`${className} bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg p-4 overflow-x-auto`}>
+        <code className={`${className} bg-transparent`} {...props}>
+          {children}
+        </code>
+      </pre>
+    </div>
+  )
+}
+
+// Custom Inline Code Component
+const InlineCode = ({ children, ...props }: any) => {
+  return (
+    <code 
+      className="bg-gray-100 dark:bg-gray-800 text-gray-800 dark:text-gray-200 px-1.5 py-0.5 rounded text-sm font-mono" 
+      {...props}
+    >
+      {children}
+    </code>
+  )
+}
 
 interface BlogPost {
   id: string
@@ -138,6 +195,17 @@ export default function BlogPostPage() {
                 h5: (props) => <h5 className="text-sm mb-1 mt-1 text-gray-500 font-medium" style={{fontFamily: 'inherit'}} {...props} />, 
                 h6: (props) => <h6 className="text-xs mb-1 mt-1 text-gray-400 font-medium uppercase tracking-wider" style={{fontFamily: 'inherit'}} {...props} />, 
                 a: ({...props}) => <a className="text-blue-600 dark:text-blue-400 underline hover:text-blue-800 dark:hover:text-blue-300 transition-colors" {...props} />,
+                table: (props) => <table className="w-full border-collapse border border-gray-300 dark:border-gray-600 my-4" {...props} />,
+                thead: (props) => <thead className="bg-gray-50 dark:bg-gray-700" {...props} />,
+                tbody: (props) => <tbody className="divide-y divide-gray-200 dark:divide-gray-600" {...props} />,
+                tr: (props) => <tr className="hover:bg-gray-50 dark:hover:bg-gray-600" {...props} />,
+                th: (props) => <th className="border border-gray-300 dark:border-gray-600 px-4 py-2 text-left font-semibold text-gray-900 dark:text-gray-100" {...props} />,
+                td: (props) => <td className="border border-gray-300 dark:border-gray-600 px-4 py-2 text-gray-700 dark:text-gray-300" {...props} />,
+                pre: CodeBlock,
+                code: InlineCode,
+                ul: (props) => <ul className="list-disc list-inside space-y-1 my-4 text-gray-700 dark:text-gray-300" {...props} />,
+                ol: (props) => <ol className="list-decimal list-inside space-y-1 my-4 text-gray-700 dark:text-gray-300" {...props} />,
+                li: (props) => <li className="text-gray-700 dark:text-gray-300" {...props} />,
               }}
             >
               {post.content}

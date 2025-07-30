@@ -84,3 +84,85 @@ body {
   .cloud-pulse { animation: none !important; }
   .server-fade, .server-light { animation: none !important; }
 }
+
+/* Override highlight.js styles for code blocks */
+.hljs {
+  background: transparent !important;
+  color: inherit !important;
+}
+
+/* Ensure code blocks have proper styling */
+pre code {
+  background: transparent !important;
+}
+
+/* Override any highlight.js background colors */
+.hljs,
+.hljs-subst,
+.hljs-tag,
+.hljs-title,
+.hljs-section,
+.hljs-selector-id,
+.hljs-selector-class,
+.hljs-selector-attr,
+.hljs-selector-pseudo,
+.hljs-addition,
+.hljs-deletion,
+.hljs-meta,
+.hljs-meta .hljs-keyword,
+.hljs-emphasis,
+.hljs-strong {
+  background: transparent !important;
+}
+
+/* Ensure syntax highlighting colors work well with our background */
+.hljs-comment {
+  color: #6b7280 !important; /* gray-500 */
+}
+
+.hljs-keyword {
+  color: #dc2626 !important; /* red-600 */
+}
+
+.hljs-string {
+  color: #059669 !important; /* emerald-600 */
+}
+
+.hljs-number {
+  color: #7c3aed !important; /* violet-600 */
+}
+
+.hljs-type {
+  color: #2563eb !important; /* blue-600 */
+}
+
+.hljs-built_in {
+  color: #ea580c !important; /* orange-600 */
+}
+
+/* Dark mode adjustments */
+@media (prefers-color-scheme: dark) {
+  .hljs-comment {
+    color: #9ca3af !important; /* gray-400 */
+  }
+  
+  .hljs-keyword {
+    color: #f87171 !important; /* red-400 */
+  }
+  
+  .hljs-string {
+    color: #34d399 !important; /* emerald-400 */
+  }
+  
+  .hljs-number {
+    color: #a78bfa !important; /* violet-400 */
+  }
+  
+  .hljs-type {
+    color: #60a5fa !important; /* blue-400 */
+  }
+  
+  .hljs-built_in {
+    color: #fb923c !important; /* orange-400 */
+  }
+}
