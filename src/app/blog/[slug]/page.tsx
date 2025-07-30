@@ -18,13 +18,12 @@ import 'katex/dist/katex.min.css'
 import 'highlight.js/styles/github.css'
 
 // Custom Code Block Component with Copy Functionality
-const CodeBlock = ({ children, className, ...props }: any) => {
+const CodeBlock = ({ children, className, ...props }: React.ComponentProps<'pre'>) => {
   const [copied, setCopied] = useState(false)
-  const language = className ? className.replace('language-', '') : ''
   
   const copyToClipboard = async () => {
     try {
-      await navigator.clipboard.writeText(children)
+      await navigator.clipboard.writeText(children as string)
       setCopied(true)
       setTimeout(() => setCopied(false), 2000)
     } catch (err) {
@@ -62,7 +61,7 @@ const CodeBlock = ({ children, className, ...props }: any) => {
 }
 
 // Custom Inline Code Component
-const InlineCode = ({ children, ...props }: any) => {
+const InlineCode = ({ children, ...props }: React.ComponentProps<'code'>) => {
   return (
     <code 
       className="bg-gray-100 dark:bg-gray-800 text-gray-800 dark:text-gray-200 px-1.5 py-0.5 rounded text-sm font-mono" 
