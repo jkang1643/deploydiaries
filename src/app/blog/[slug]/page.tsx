@@ -72,6 +72,18 @@ const InlineCode = ({ children, ...props }: React.ComponentProps<'code'>) => {
   )
 }
 
+// Custom Blockquote Component
+const Blockquote = ({ children, ...props }: React.ComponentProps<'blockquote'>) => {
+  return (
+    <blockquote 
+      className="border-l-4 border-gray-300 dark:border-gray-600 pl-6 py-4 my-6 bg-gray-50 dark:bg-gray-800 rounded-r-lg italic text-gray-700 dark:text-gray-300 text-lg leading-relaxed" 
+      {...props}
+    >
+      {children}
+    </blockquote>
+  )
+}
+
 interface BlogPost {
   id: string
   title: string
@@ -202,8 +214,9 @@ export default function BlogPostPage() {
                 td: (props) => <td className="border border-gray-300 dark:border-gray-600 px-4 py-2 text-gray-700 dark:text-gray-300" {...props} />,
                 pre: CodeBlock,
                 code: InlineCode,
+                blockquote: Blockquote,
                 ul: (props) => <ul className="list-disc list-inside space-y-1 my-4 text-gray-700 dark:text-gray-300" {...props} />,
-                ol: (props) => <ol className="list-decimal list-inside space-y-1 my-4 text-gray-700 dark:text-gray-300" {...props} />,
+                ol: (props) => <ol className="list-decimal list-outside space-y-1 my-4 text-gray-700 dark:text-gray-300 ml-4" {...props} />,
                 li: (props) => <li className="text-gray-700 dark:text-gray-300" {...props} />,
               }}
             >
