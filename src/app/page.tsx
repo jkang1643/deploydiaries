@@ -258,6 +258,16 @@ export default function Home() {
                       h4: ({children}: MarkdownComponentProps) => <p className="text-sm font-medium text-gray-600 dark:text-gray-400 mb-1" style={{fontFamily: 'inherit'}}>{children}</p>, 
                       h5: ({children}: MarkdownComponentProps) => <p className="text-xs font-medium text-gray-500 dark:text-gray-500 mb-1" style={{fontFamily: 'inherit'}}>{children}</p>, 
                       h6: ({children}: MarkdownComponentProps) => <p className="text-xs font-medium text-gray-400 dark:text-gray-600 mb-1" style={{fontFamily: 'inherit'}}>{children}</p>, 
+                      img: ({src, alt, ...props}) => (
+                        <div className="flex justify-center my-3">
+                          <img 
+                            src={src} 
+                            alt={alt} 
+                            className="max-w-full h-auto rounded-lg shadow-sm" 
+                            {...props} 
+                          />
+                        </div>
+                      ),
                       table: () => <p className="text-gray-600 dark:text-gray-400 text-sm italic">[Table content]</p>,
                       thead: ({children}: MarkdownComponentProps) => <span>{children}</span>,
                       tbody: ({children}: MarkdownComponentProps) => <span>{children}</span>,
@@ -340,6 +350,17 @@ export default function Home() {
                       h4: ({children}: MarkdownComponentProps) => <p className="text-sm font-medium text-gray-600 dark:text-gray-400 mb-1" style={{fontFamily: 'inherit'}}>{children}</p>, 
                       h5: ({children}: MarkdownComponentProps) => <p className="text-xs font-medium text-gray-500 dark:text-gray-500 mb-1" style={{fontFamily: 'inherit'}}>{children}</p>, 
                       h6: ({children}: MarkdownComponentProps) => <p className="text-xs font-medium text-gray-400 dark:text-gray-600 mb-1" style={{fontFamily: 'inherit'}}>{children}</p>, 
+                      img: ({src, alt, height, width, style, ...props}) => (
+                        <img 
+                          src={src} 
+                          alt={alt} 
+                          height={height}
+                          width={width}
+                          style={style}
+                          className="max-w-full rounded-lg shadow-sm block mx-auto my-3" 
+                          {...props} 
+                        />
+                      ),
                       table: () => <p className="text-gray-600 dark:text-gray-400 text-sm italic">[Table content]</p>,
                       thead: ({children}: MarkdownComponentProps) => <span>{children}</span>,
                       tbody: ({children}: MarkdownComponentProps) => <span>{children}</span>,

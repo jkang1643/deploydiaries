@@ -206,6 +206,17 @@ export default function BlogPostPage() {
                 h5: (props) => <h5 className="text-sm mb-1 mt-1 text-gray-500 font-medium" style={{fontFamily: 'inherit'}} {...props} />, 
                 h6: (props) => <h6 className="text-xs mb-1 mt-1 text-gray-400 font-medium uppercase tracking-wider" style={{fontFamily: 'inherit'}} {...props} />, 
                 a: ({...props}) => <a className="text-blue-600 dark:text-blue-400 underline hover:text-blue-800 dark:hover:text-blue-300 transition-colors" {...props} />,
+                img: ({src, alt, height, width, style, ...props}) => (
+                  <img 
+                    src={src} 
+                    alt={alt} 
+                    height={height}
+                    width={width}
+                    style={style}
+                    className="max-w-full rounded-lg shadow-md block mx-auto my-6" 
+                    {...props} 
+                  />
+                ),
                 table: (props) => <table className="w-full border-collapse border border-gray-300 dark:border-gray-600 my-4" {...props} />,
                 thead: (props) => <thead className="bg-gray-50 dark:bg-gray-700" {...props} />,
                 tbody: (props) => <tbody className="divide-y divide-gray-200 dark:divide-gray-600" {...props} />,
