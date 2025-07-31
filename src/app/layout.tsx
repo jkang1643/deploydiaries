@@ -13,7 +13,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Modernist - Culture, Identity, and Ideas",
+  title: "Deploy Diaries: A builder's notebook from the edge of the cloud",
   description: "A modern portfolio and blog site exploring art, identity, and ideas through thoughtful discourse and deep reflection.",
 };
 
