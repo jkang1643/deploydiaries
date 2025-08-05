@@ -78,16 +78,16 @@ export default function Home() {
     <div ref={containerRef} className="min-h-screen bg-gray-50 dark:bg-gray-900">
       {/* Main Blog Section */}
       <motion.div 
-        className="min-h-screen flex items-stretch"
+        className="min-h-screen flex flex-col lg:flex-row items-stretch"
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ duration: 0.8 }}
       >
         {/* Left Panel */}
         <motion.div 
-          className="w-1/2 bg-white dark:bg-gray-800 p-8 pb-12 flex flex-col justify-between relative h-screen"
-          initial={{ x: -100, opacity: 0 }}
-          animate={{ x: 0, opacity: 1 }}
+          className="w-full lg:w-1/2 bg-white dark:bg-gray-800 p-8 pb-12 flex flex-col justify-between relative min-h-screen lg:h-screen"
+          initial={{ y: -100, x: -100, opacity: 0 }}
+          animate={{ y: 0, x: 0, opacity: 1 }}
           transition={{ duration: 0.8, delay: 0.2 }}
         >
           {/* Logo */}
@@ -119,95 +119,97 @@ export default function Home() {
             </p>
           </motion.div>
         
-        {/* Compact, unified SVG for cloud, lines, pulses, and servers */}
-        <div className="flex justify-center items-center mt-8 mb-4" style={{ minHeight: 260 }}>
-          <svg
-            width="300"
-            height="220"
-            viewBox="0 0 180 160"
-            fill="none"
-            xmlns="http://www.w3.org/2000/svg"
-            style={{ display: 'block' }}
-          >
-            {/* Cloud shape at top center */}
-            <g>
-              <ellipse cx="90" cy="28" rx="36" ry="18" fill="url(#cloudGradient)" />
-              <ellipse cx="72" cy="26" rx="14" ry="10" fill="url(#cloudGradient)" />
-              <ellipse cx="108" cy="26" rx="14" ry="10" fill="url(#cloudGradient)" />
-              <ellipse cx="90" cy="18" rx="18" ry="10" fill="url(#cloudGradient)" />
-            </g>
-            <defs>
-              <linearGradient id="cloudGradient" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="0%" stopColor="#e0e7ef" />
-                <stop offset="100%" stopColor="#b6c3d1" />
-              </linearGradient>
-            </defs>
-            {/* Lines from base of cloud (90,46) to server tops */}
-            <line x1="90" y1="46" x2="30" y2="100" stroke="#d1d5db" strokeWidth="2" />
-            <line x1="90" y1="46" x2="90" y2="100" stroke="#d1d5db" strokeWidth="2" />
-            <line x1="90" y1="46" x2="150" y2="100" stroke="#d1d5db" strokeWidth="2" />
-            {/* Pulses */}
-            <circle className="cloud-pulse-svg cloud-pulse-svg-0" r="5" fill="#38bdf8" filter="url(#glow)" >
-              <animate attributeName="cx" values="90;30" keyTimes="0;1" dur="2.5s" repeatCount="indefinite" />
-              <animate attributeName="cy" values="46;100" keyTimes="0;1" dur="2.5s" repeatCount="indefinite" />
-            </circle>
-            <circle className="cloud-pulse-svg cloud-pulse-svg-1" r="5" fill="#38bdf8" filter="url(#glow)">
-              <animate attributeName="cx" values="90;90" keyTimes="0;1" dur="2.5s" repeatCount="indefinite" begin="0.3s" />
-              <animate attributeName="cy" values="46;100" keyTimes="0;1" dur="2.5s" repeatCount="indefinite" begin="0.3s" />
-            </circle>
-            <circle className="cloud-pulse-svg cloud-pulse-svg-2" r="5" fill="#38bdf8" filter="url(#glow)">
-              <animate attributeName="cx" values="90;150" keyTimes="0;1" dur="2.5s" repeatCount="indefinite" begin="0.6s" />
-              <animate attributeName="cy" values="46;100" keyTimes="0;1" dur="2.5s" repeatCount="indefinite" begin="0.6s" />
-            </circle>
-            {/* Server boxes at endpoints */}
-            <g>
-              {/* Left server */}
-              <rect x="12" y="100" width="36" height="20" rx="6" fill="#f8fafc" stroke="#cbd5e1" strokeWidth="2" />
-              {/* Center server */}
-              <rect x="72" y="100" width="36" height="20" rx="6" fill="#f8fafc" stroke="#cbd5e1" strokeWidth="2" />
-              {/* Right server */}
-              <rect x="132" y="100" width="36" height="20" rx="6" fill="#f8fafc" stroke="#cbd5e1" strokeWidth="2" />
-              {/* Minimal server grid icon for each */}
-              {/* Left grid */}
+                {/* Compact, unified SVG for cloud, lines, pulses, and servers */}
+        <div className="flex justify-center items-center mt-8 mb-4" style={{ minHeight: '200px' }}>
+          <div style={{ maxWidth: '300px', width: '100%' }}>
+            <svg
+              width="100%"
+              height="auto"
+              viewBox="0 0 180 160"
+              fill="none"
+              xmlns="http://www.w3.org/2000/svg"
+              style={{ display: 'block' }}
+            >
+              {/* Cloud shape at top center */}
               <g>
-                <rect x="22" y="104" width="6" height="6" rx="1" fill="#d1d5db"/>
-                <rect x="30" y="104" width="6" height="6" rx="1" fill="#d1d5db"/>
-                <rect x="22" y="112" width="6" height="6" rx="1" fill="#d1d5db"/>
-                <rect x="30" y="112" width="6" height="6" rx="1" fill="#d1d5db"/>
+                <ellipse cx="90" cy="28" rx="36" ry="18" fill="url(#cloudGradient)" />
+                <ellipse cx="72" cy="26" rx="14" ry="10" fill="url(#cloudGradient)" />
+                <ellipse cx="108" cy="26" rx="14" ry="10" fill="url(#cloudGradient)" />
+                <ellipse cx="90" cy="18" rx="18" ry="10" fill="url(#cloudGradient)" />
               </g>
-              {/* Center grid */}
+              <defs>
+                <linearGradient id="cloudGradient" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stopColor="#e0e7ef" />
+                  <stop offset="100%" stopColor="#b6c3d1" />
+                </linearGradient>
+              </defs>
+              {/* Lines from base of cloud (90,46) to server tops */}
+              <line x1="90" y1="46" x2="30" y2="100" stroke="#d1d5db" strokeWidth="2" />
+              <line x1="90" y1="46" x2="90" y2="100" stroke="#d1d5db" strokeWidth="2" />
+              <line x1="90" y1="46" x2="150" y2="100" stroke="#d1d5db" strokeWidth="2" />
+              {/* Pulses */}
+              <circle className="cloud-pulse-svg cloud-pulse-svg-0" r="5" fill="#38bdf8" filter="url(#glow)" >
+                <animate attributeName="cx" values="90;30" keyTimes="0;1" dur="2.5s" repeatCount="indefinite" />
+                <animate attributeName="cy" values="46;100" keyTimes="0;1" dur="2.5s" repeatCount="indefinite" />
+              </circle>
+              <circle className="cloud-pulse-svg cloud-pulse-svg-1" r="5" fill="#38bdf8" filter="url(#glow)">
+                <animate attributeName="cx" values="90;90" keyTimes="0;1" dur="2.5s" repeatCount="indefinite" begin="0.3s" />
+                <animate attributeName="cy" values="46;100" keyTimes="0;1" dur="2.5s" repeatCount="indefinite" begin="0.3s" />
+              </circle>
+              <circle className="cloud-pulse-svg cloud-pulse-svg-2" r="5" fill="#38bdf8" filter="url(#glow)">
+                <animate attributeName="cx" values="90;150" keyTimes="0;1" dur="2.5s" repeatCount="indefinite" begin="0.6s" />
+                <animate attributeName="cy" values="46;100" keyTimes="0;1" dur="2.5s" repeatCount="indefinite" begin="0.6s" />
+              </circle>
+              {/* Server boxes at endpoints */}
               <g>
-                <rect x="82" y="104" width="6" height="6" rx="1" fill="#d1d5db"/>
-                <rect x="90" y="104" width="6" height="6" rx="1" fill="#d1d5db"/>
-                <rect x="82" y="112" width="6" height="6" rx="1" fill="#d1d5db"/>
-                <rect x="90" y="112" width="6" height="6" rx="1" fill="#d1d5db"/>
+                {/* Left server */}
+                <rect x="12" y="100" width="36" height="20" rx="6" fill="#f8fafc" stroke="#cbd5e1" strokeWidth="2" />
+                {/* Center server */}
+                <rect x="72" y="100" width="36" height="20" rx="6" fill="#f8fafc" stroke="#cbd5e1" strokeWidth="2" />
+                {/* Right server */}
+                <rect x="132" y="100" width="36" height="20" rx="6" fill="#f8fafc" stroke="#cbd5e1" strokeWidth="2" />
+                {/* Minimal server grid icon for each */}
+                {/* Left grid */}
+                <g>
+                  <rect x="22" y="104" width="6" height="6" rx="1" fill="#d1d5db"/>
+                  <rect x="30" y="104" width="6" height="6" rx="1" fill="#d1d5db"/>
+                  <rect x="22" y="112" width="6" height="6" rx="1" fill="#d1d5db"/>
+                  <rect x="30" y="112" width="6" height="6" rx="1" fill="#d1d5db"/>
+                </g>
+                {/* Center grid */}
+                <g>
+                  <rect x="82" y="104" width="6" height="6" rx="1" fill="#d1d5db"/>
+                  <rect x="90" y="104" width="6" height="6" rx="1" fill="#d1d5db"/>
+                  <rect x="82" y="112" width="6" height="6" rx="1" fill="#d1d5db"/>
+                  <rect x="90" y="112" width="6" height="6" rx="1" fill="#d1d5db"/>
+                </g>
+                {/* Right grid */}
+                <g>
+                  <rect x="142" y="104" width="6" height="6" rx="1" fill="#d1d5db"/>
+                  <rect x="150" y="104" width="6" height="6" rx="1" fill="#d1d5db"/>
+                  <rect x="142" y="112" width="6" height="6" rx="1" fill="#d1d5db"/>
+                  <rect x="150" y="112" width="6" height="6" rx="1" fill="#d1d5db"/>
+                </g>
               </g>
-              {/* Right grid */}
-              <g>
-                <rect x="142" y="104" width="6" height="6" rx="1" fill="#d1d5db"/>
-                <rect x="150" y="104" width="6" height="6" rx="1" fill="#d1d5db"/>
-                <rect x="142" y="112" width="6" height="6" rx="1" fill="#d1d5db"/>
-                <rect x="150" y="112" width="6" height="6" rx="1" fill="#d1d5db"/>
-              </g>
-            </g>
-            <defs>
-              <filter id="glow" x="-20" y="-20" width="60" height="60">
-                <feGaussianBlur stdDeviation="4" result="coloredBlur"/>
-                <feMerge>
-                  <feMergeNode in="coloredBlur"/>
-                  <feMergeNode in="SourceGraphic"/>
-                </feMerge>
-              </filter>
-            </defs>
-          </svg>
+              <defs>
+                <filter id="glow" x="-20" y="-20" width="60" height="60">
+                  <feGaussianBlur stdDeviation="4" result="coloredBlur"/>
+                  <feMerge>
+                    <feMergeNode in="coloredBlur"/>
+                    <feMergeNode in="SourceGraphic"/>
+                  </feMerge>
+                </filter>
+              </defs>
+            </svg>
+          </div>
         </div>
         </motion.div>
-      
+        
         {/* Right Panel */}
         <motion.div 
-          className="w-1/2 p-8 pb-12"
-          initial={{ x: 100, opacity: 0 }}
-          animate={{ x: 0, opacity: 1 }}
+          className="w-full lg:w-1/2 p-8 pb-12"
+          initial={{ y: 100, x: 100, opacity: 0 }}
+          animate={{ y: 0, x: 0, opacity: 1 }}
           transition={{ duration: 0.8, delay: 0.3 }}
         >
           {/* Featured Article */}
@@ -315,7 +317,7 @@ export default function Home() {
         
           {/* Additional Articles Grid */}
           <motion.div 
-            className="grid grid-cols-1 md:grid-cols-2 gap-6"
+            className="grid grid-cols-1 lg:grid-cols-2 gap-6"
             initial={{ y: 50, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
             transition={{ duration: 0.6, delay: 0.7 }}
@@ -479,7 +481,7 @@ export default function Home() {
             animate={{ y: aboutInView ? 0 : 100, opacity: aboutInView ? 1 : 0 }}
             transition={{ duration: 0.8, delay: 0.2 }}
           >
-            <h2 className="text-6xl md:text-8xl font-thin text-gray-900 dark:text-white mb-8">
+            <h2 className="text-4xl md:text-6xl lg:text-8xl font-thin text-gray-900 dark:text-white mb-8">
               About
             </h2>
           </motion.div>
@@ -490,19 +492,19 @@ export default function Home() {
             transition={{ duration: 0.8, delay: 0.4 }}
             className="space-y-8"
           >
-            <p className="text-2xl md:text-3xl font-light text-gray-700 dark:text-gray-300 leading-relaxed">
+            <p className="text-xl md:text-2xl lg:text-3xl font-light text-gray-700 dark:text-gray-300 leading-relaxed">
               Building the future,<br />
               one deployment at a time.
             </p>
             
             <div className="max-w-2xl mx-auto">
-              <p className="text-lg text-gray-600 dark:text-gray-400 leading-relaxed mb-6">
+              <p className="text-base md:text-lg text-gray-600 dark:text-gray-400 leading-relaxed mb-6">
                 I&apos;m a cloud architect and developer passionate about creating scalable, 
                 resilient systems in the AWS ecosystem. My journey spans from startup 
                 experimentation to enterprise-grade infrastructure.
               </p>
               
-              <p className="text-lg text-gray-600 dark:text-gray-400 leading-relaxed">
+              <p className="text-base md:text-lg text-gray-600 dark:text-gray-400 leading-relaxed">
                 Through Deploy Diaries, I share the real stories behind the code—the 
                 victories, the failures, and the lessons learned in between. Every post 
                 is a glimpse into the iterative process of building something meaningful.
@@ -514,12 +516,12 @@ export default function Home() {
             initial={{ y: 100, opacity: 0 }}
             animate={{ y: aboutInView ? 0 : 100, opacity: aboutInView ? 1 : 0 }}
             transition={{ duration: 0.8, delay: 0.6 }}
-            className="mt-16 flex flex-wrap justify-center gap-8"
+            className="mt-16 flex flex-wrap justify-center gap-4 md:gap-8"
           >
             {['AWS', 'Serverless', 'DevOps', 'Infrastructure as Code', 'Microservices'].map((skill, index) => (
               <motion.div
                 key={skill}
-                className="px-6 py-3 bg-gray-100 dark:bg-gray-800 rounded-full text-gray-700 dark:text-gray-300 font-medium"
+                className="px-4 md:px-6 py-2 md:py-3 bg-gray-100 dark:bg-gray-800 rounded-full text-sm md:text-base text-gray-700 dark:text-gray-300 font-medium"
                 initial={{ scale: 0, opacity: 0 }}
                 animate={{ scale: aboutInView ? 1 : 0, opacity: aboutInView ? 1 : 0 }}
                 transition={{ duration: 0.4, delay: 0.8 + index * 0.1 }}
@@ -539,7 +541,7 @@ export default function Home() {
             <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
               <Link
                 href="/contact"
-                className="inline-flex items-center px-8 py-4 bg-black dark:bg-white text-white dark:text-black rounded-full text-lg font-medium hover:bg-gray-800 dark:hover:bg-gray-200 transition-colors"
+                className="inline-flex items-center px-6 md:px-8 py-3 md:py-4 bg-black dark:bg-white text-white dark:text-black rounded-full text-base md:text-lg font-medium hover:bg-gray-800 dark:hover:bg-gray-200 transition-colors"
               >
                 Get in touch
               </Link>
@@ -549,7 +551,7 @@ export default function Home() {
         
         {/* Floating Elements */}
         <motion.div
-          className="absolute top-20 left-20 w-4 h-4 bg-blue-500 rounded-full opacity-20"
+          className="absolute top-20 left-20 w-4 h-4 bg-blue-500 rounded-full opacity-20 hidden md:block"
           animate={{ 
             y: [0, -20, 0],
             scale: [1, 1.2, 1]
@@ -561,7 +563,7 @@ export default function Home() {
           }}
         />
         <motion.div
-          className="absolute bottom-32 right-32 w-6 h-6 bg-green-500 rounded-full opacity-20"
+          className="absolute bottom-32 right-32 w-6 h-6 bg-green-500 rounded-full opacity-20 hidden md:block"
           animate={{ 
             y: [0, -30, 0],
             scale: [1, 0.8, 1]
@@ -574,7 +576,7 @@ export default function Home() {
           }}
         />
         <motion.div
-          className="absolute top-1/2 right-20 w-3 h-3 bg-purple-500 rounded-full opacity-20"
+          className="absolute top-1/2 right-20 w-3 h-3 bg-purple-500 rounded-full opacity-20 hidden md:block"
           animate={{ 
             x: [0, -15, 0],
             scale: [1, 1.3, 1]
