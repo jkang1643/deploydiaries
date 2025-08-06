@@ -172,12 +172,10 @@ export default function BlogPostPage() {
         <article className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-8">
           {post.previewImage && (
             <div className="flex justify-center mb-8">
-              <Image 
+              <img 
                 src={post.previewImage} 
                 alt={`Preview for ${post.title}`}
                 className="w-full h-full object-cover"
-                width={600}
-                height={300}
               />
             </div>
           )}

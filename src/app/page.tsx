@@ -223,11 +223,9 @@ export default function Home() {
             >
             {latestPost.previewImage && (
               <div className="w-full h-48 rounded-lg mb-6 overflow-hidden flex-shrink-0">
-                <Image 
+                <img 
                   src={latestPost.previewImage} 
                   alt={`Preview for ${latestPost.title}`}
-                  width={400}
-                  height={192}
                   className="w-full h-full object-cover"
                 />
               </div>

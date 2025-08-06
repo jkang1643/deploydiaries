@@ -75,6 +75,7 @@ const nextConfig: NextConfig = {
         port: '',
         pathname: '/**',
       },
+
     ],
     unoptimized: false,
   },

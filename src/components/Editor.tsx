@@ -26,6 +26,16 @@ const markdownPreviewStyle = `
   }
 `;
 
+// Function to validate image URL
+const validateImageUrl = async (url: string): Promise<boolean> => {
+  try {
+    const response = await fetch(url, { method: 'HEAD' });
+    return response.ok;
+  } catch {
+    return false;
+  }
+};
+
 export default function Editor({
   title = '',
   author = '',
@@ -42,6 +52,22 @@ export default function Editor({
   const [publishError, setPublishError] = useState<string | null>(null);
   const [publishSuccess, setPublishSuccess] = useState(false);
   const [imageError, setImageError] = useState(false);
+  const [isValidatingImage, setIsValidatingImage] = useState(false);
+
+  // Validate image URL when it changes
+  const handlePreviewImageChange = async (url: string) => {
+    setLocalPreviewImage(url);
+    setImageError(false);
+    
+    if (url && url.startsWith('http')) {
+      setIsValidatingImage(true);
+      const isValid = await validateImageUrl(url);
+      if (!isValid) {
+        setImageError(true);
+      }
+      setIsValidatingImage(false);
+    }
+  };
 
   const handleSave = async () => {
     if (!localTitle || !localAuthor || !markdown) {
@@ -124,10 +150,7 @@ export default function Editor({
             type="url"
             placeholder="https://example.com/image.jpg"
             value={localPreviewImage ?? ""}
-            onChange={(e) => {
-              setLocalPreviewImage(e.target.value);
-              setImageError(false); // Reset error state when URL changes
-            }}
+            onChange={(e) => handlePreviewImageChange(e.target.value)}
             className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white text-lg"
           />
         </div>
@@ -139,13 +162,36 @@ export default function Editor({
               <div className="mb-2 text-sm text-gray-600 dark:text-gray-400">
                 Preview Image URL: {localPreviewImage}
               </div>
-              {!imageError ? (
-                <Image 
+              {isValidatingImage ? (
+                <div className="w-full h-64 bg-gray-200 dark:bg-gray-700 rounded-lg flex items-center justify-center">
+                  <div className="text-center">
+                    <div className="text-gray-500 dark:text-gray-400 mb-2">
+                      Validating image...
+                    </div>
+                  </div>
+                </div>
+              ) : imageError ? (
+                <div className="w-full h-64 bg-gray-200 dark:bg-gray-700 rounded-lg flex items-center justify-center">
+                  <div className="text-center">
+                    <div className="text-gray-500 dark:text-gray-400 mb-2">
+                      Image failed to load
+                    </div>
+                    <div className="text-xs text-gray-400 dark:text-gray-500 mb-3">
+                      URL: {localPreviewImage}
+                    </div>
+                    <button
+                      onClick={() => handlePreviewImageChange(localPreviewImage)}
+                      className="text-blue-600 dark:text-blue-400 hover:underline text-sm"
+                    >
+                      Try again
+                    </button>
+                  </div>
+                </div>
+              ) : (
+                <img 
                   src={localPreviewImage} 
                   alt={`Preview for ${localTitle}`}
                   className="w-full h-64 object-cover rounded-lg"
-                  width={600}
-                  height={300}
                   onError={(e) => {
                     console.error('Image failed to load:', localPreviewImage);
                     console.error('Error event:', e);
@@ -156,20 +202,6 @@ export default function Editor({
                     setImageError(false);
                   }}
                 />
-              ) : (
-                <div className="w-full h-64 bg-gray-200 dark:bg-gray-700 rounded-lg flex items-center justify-center">
-                  <div className="text-center">
-                    <div className="text-gray-500 dark:text-gray-400 mb-2">
-                      Image failed to load
-                    </div>
-                    <button
-                      onClick={() => setImageError(false)}
-                      className="text-blue-600 dark:text-blue-400 hover:underline text-sm"
-                    >
-                      Try again
-                    </button>
-                  </div>
-                </div>
               )}
             </div>
           </div>
