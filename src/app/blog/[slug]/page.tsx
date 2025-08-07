@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import React, { useState, useEffect } from 'react'
 import { useParams } from 'next/navigation'
 import Link from 'next/link'
 import Image from 'next/image'
@@ -23,7 +23,27 @@ const CodeBlock = ({ children, className, ...props }: React.ComponentProps<'pre'
   
   const copyToClipboard = async () => {
     try {
-      await navigator.clipboard.writeText(children as string)
+      // Function to extract text content from React elements
+      const extractTextContent = (element: React.ReactNode): string => {
+        if (typeof element === 'string') {
+          return element
+        }
+        if (typeof element === 'number') {
+          return String(element)
+        }
+        if (React.isValidElement(element)) {
+          const reactElement = element as React.ReactElement
+          const children = (reactElement.props as { children?: React.ReactNode })?.children
+          if (Array.isArray(children)) {
+            return children.map(extractTextContent).join('')
+          }
+          return extractTextContent(children)
+        }
+        return ''
+      }
+      
+      const textToCopy = extractTextContent(children)
+      await navigator.clipboard.writeText(textToCopy)
       setCopied(true)
       setTimeout(() => setCopied(false), 2000)
     } catch (err) {
