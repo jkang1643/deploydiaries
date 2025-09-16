@@ -272,7 +272,7 @@ export default function BlogPage() {
 
       {/* Main Content */}
       <Container maxWidth="xl" sx={{ py: 6 }}>
-        <Grid container spacing={{ xs: 3, md: 4, lg: 6 }}>
+        <Grid container spacing={4}>
           {/* Posts */}
           <Grid item xs={12} lg={9}>
             <Stack spacing={4}>
@@ -366,7 +366,15 @@ export default function BlogPage() {
                                   }}
                                 />
                               ) : (
-                                <Typography variant="body2" color="text.secondary">
+                                <Typography 
+                                  variant="body1" 
+                                  color="text.primary"
+                                  sx={{ 
+                                    fontWeight: 500,
+                                    opacity: 0.6,
+                                    fontSize: '0.9rem',
+                                  }}
+                                >
                                   No Image
                                 </Typography>
                               )}
@@ -489,117 +497,95 @@ export default function BlogPage() {
 
           {/* Sidebar */}
           <Grid item xs={12} lg={3}>
-            <Box sx={{ position: { lg: 'sticky' }, top: { lg: 24 } }}>
-              <Stack spacing={{ xs: 3, md: 4 }}>
-                {/* Timeline */}
-                <Paper sx={{ 
-                  p: { xs: 2.5, md: 3 }, 
-                  borderRadius: 2,
-                  border: '1px solid',
-                  borderColor: 'grey.200',
-                }}>
-                  <Typography variant="h6" sx={{ mb: 3, fontWeight: 600 }}>
-                    Browse by Date
-                  </Typography>
-                  <Timeline
-                    posts={posts}
-                    onSelect={(year, month) => setTimelineSelection({ year, month })}
-                    selected={timelineSelection}
-                  />
-                  {timelineSelection && (
-                    <Button
-                      variant="text"
-                      size="small"
-                      onClick={() => setTimelineSelection(null)}
-                      sx={{ mt: 2, color: 'text.secondary' }}
-                    >
-                      Clear filter
-                    </Button>
-                  )}
-                </Paper>
-
-                {/* Recent Articles */}
-                <Paper sx={{ 
-                  p: { xs: 2.5, md: 3 }, 
-                  borderRadius: 2,
-                  border: '1px solid',
-                  borderColor: 'grey.200',
-                }}>
-                  <Typography variant="h6" sx={{ mb: 3, fontWeight: 600 }}>
-                    Recent Articles
-                  </Typography>
-                  <Stack spacing={2.5}>
-                    {posts.slice(0, 3).map((post) => (
-                      <Box key={post.id}>
-                        <Typography
-                          component={Link}
-                          href={`/blog/${post.slug}`}
-                          variant="subtitle2"
-                          sx={{
-                            fontWeight: 600,
-                            textDecoration: 'none',
-                            color: 'inherit',
-                            display: 'block',
-                            mb: 0.5,
-                            lineHeight: 1.4,
-                            '&:hover': { color: 'primary.main' },
-                          }}
-                        >
-                          {post.title}
-                        </Typography>
-                        <Typography variant="caption" color="text.secondary">
-                          {new Date(post.createdAt).toLocaleDateString()}
-                        </Typography>
-                      </Box>
-                    ))}
-                  </Stack>
-                </Paper>
-
-                {/* Newsletter Signup */}
-                <Paper sx={{ 
-                  p: { xs: 2.5, md: 3 }, 
-                  borderRadius: 2, 
-                  bgcolor: 'secondary.main', 
-                  color: 'white',
-                  border: '1px solid',
-                  borderColor: 'secondary.main',
-                }}>
-                  <Typography variant="h6" sx={{ mb: 2, fontWeight: 600 }}>
-                    Stay Updated
-                  </Typography>
-                  <Typography variant="body2" sx={{ mb: 3, opacity: 0.9, lineHeight: 1.5 }}>
-                    Get notified when new articles are published.
-                  </Typography>
-                  <TextField
-                    fullWidth
-                    placeholder="Enter your email"
-                    size="small"
-                    sx={{
-                      mb: 2,
-                      '& .MuiOutlinedInput-root': {
-                        bgcolor: 'white',
-                        borderRadius: 1,
-                      },
-                    }}
-                  />
+            <Stack spacing={4}>
+              {/* Timeline */}
+              <Paper sx={{ p: 3, borderRadius: 2 }}>
+                <Typography variant="h6" sx={{ mb: 3, fontWeight: 600 }}>
+                  Browse by Date
+                </Typography>
+                <Timeline
+                  posts={posts}
+                  onSelect={(year, month) => setTimelineSelection({ year, month })}
+                  selected={timelineSelection}
+                />
+                {timelineSelection && (
                   <Button
-                    fullWidth
-                    variant="contained"
-                    sx={{
-                      bgcolor: 'white',
-                      color: 'secondary.main',
-                      fontWeight: 600,
-                      py: 1,
-                      '&:hover': {
-                        bgcolor: 'grey.100',
-                      },
-                    }}
+                    variant="text"
+                    size="small"
+                    onClick={() => setTimelineSelection(null)}
+                    sx={{ mt: 2, color: 'text.secondary' }}
                   >
-                    Subscribe
+                    Clear filter
                   </Button>
-                </Paper>
-              </Stack>
-            </Box>
+                )}
+              </Paper>
+
+              {/* Recent Articles */}
+              <Paper sx={{ p: 3, borderRadius: 2 }}>
+                <Typography variant="h6" sx={{ mb: 3, fontWeight: 600 }}>
+                  Recent Articles
+                </Typography>
+                <Stack spacing={2}>
+                  {posts.slice(0, 3).map((post) => (
+                    <Box key={post.id}>
+                      <Typography
+                        component={Link}
+                        href={`/blog/${post.slug}`}
+                        variant="subtitle2"
+                        sx={{
+                          fontWeight: 600,
+                          textDecoration: 'none',
+                          color: 'inherit',
+                          display: 'block',
+                          mb: 0.5,
+                          '&:hover': { color: 'primary.main' },
+                        }}
+                      >
+                        {post.title}
+                      </Typography>
+                      <Typography variant="caption" color="text.secondary">
+                        {new Date(post.createdAt).toLocaleDateString()}
+                      </Typography>
+                    </Box>
+                  ))}
+                </Stack>
+              </Paper>
+
+              {/* Newsletter Signup */}
+              <Paper sx={{ p: 3, borderRadius: 2, bgcolor: 'secondary.main', color: 'white' }}>
+                <Typography variant="h6" sx={{ mb: 2, fontWeight: 600 }}>
+                  Stay Updated
+                </Typography>
+                <Typography variant="body2" sx={{ mb: 3 }}>
+                  Get notified when new articles are published.
+                </Typography>
+                <TextField
+                  fullWidth
+                  placeholder="Enter your email"
+                  size="small"
+                  sx={{
+                    mb: 2,
+                    '& .MuiOutlinedInput-root': {
+                      bgcolor: 'white',
+                      borderRadius: 1,
+                    },
+                  }}
+                />
+                <Button
+                  fullWidth
+                  variant="contained"
+                  sx={{
+                    bgcolor: 'white',
+                    color: 'secondary.main',
+                    '&:hover': {
+                      bgcolor: 'grey.100',
+                    },
+                  }}
+                >
+                  Subscribe
+                </Button>
+              </Paper>
+            </Stack>
           </Grid>
         </Grid>
       </Container>

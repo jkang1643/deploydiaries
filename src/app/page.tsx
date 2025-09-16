@@ -1,33 +1,28 @@
 'use client'
 
+import React, { useState, useEffect, useRef } from 'react'
 import Link from 'next/link'
-import Image from 'next/image'
-import { useState, useEffect, useRef } from 'react'
-import { motion, useInView } from 'framer-motion'
-import React from 'react' // Added for React.Fragment
-import ReactMarkdown from 'react-markdown'
-import remarkGfm from 'remark-gfm'
-import remarkBreaks from 'remark-breaks'
-import rehypeRaw from 'rehype-raw'
-import remarkMath from 'remark-math'
-import rehypeKatex from 'rehype-katex'
-import rehypeHighlight from 'rehype-highlight'
-import rehypeSlug from 'rehype-slug'
-import rehypeAutolinkHeadings from 'rehype-autolink-headings'
-import 'katex/dist/katex.min.css'
-import 'highlight.js/styles/github.css'
-
-// Custom Inline Code Component
-const InlineCode = ({ children, ...props }: React.ComponentProps<'code'>) => {
-  return (
-    <code 
-      className="bg-gray-100 dark:bg-gray-800 text-gray-800 dark:text-gray-200 px-1.5 py-0.5 rounded text-sm font-mono" 
-      {...props}
-    >
-      {children}
-    </code>
-  )
-}
+import { motion, useInView, useScroll, useTransform } from 'framer-motion'
+import {
+  Box,
+  Container,
+  Typography,
+  Card,
+  CardContent,
+  CardMedia,
+  Button,
+  Chip,
+  Avatar,
+  Grid,
+  Stack,
+  Paper,
+  Divider,
+} from '@mui/material'
+import { 
+  AccessTime as AccessTimeIcon,
+  ArrowForward as ArrowForwardIcon,
+  Person as PersonIcon,
+} from '@mui/icons-material'
 
 interface BlogPost {
   id: string
@@ -41,19 +36,73 @@ interface BlogPost {
   previewImage?: string
 }
 
-// Type for ReactMarkdown components
-interface MarkdownComponentProps {
-  children?: React.ReactNode
-  className?: string
+// Estimated read time calculator
+const calculateReadTime = (content: string): number => {
+  const wordsPerMinute = 200
+  const words = content.split(' ').length
+  return Math.ceil(words / wordsPerMinute)
 }
+
+// Strip markdown formatting and return plain text for previews
+const stripMarkdown = (markdown: string): string => {
+  return markdown
+    // Remove code blocks
+    .replace(/```[\s\S]*?```/g, '')
+    // Remove inline code
+    .replace(/`([^`]+)`/g, '$1')
+    // Remove headers
+    .replace(/^#{1,6}\s+/gm, '')
+    // Remove bold/italic
+    .replace(/\*\*([^*]+)\*\*/g, '$1')
+    .replace(/\*([^*]+)\*/g, '$1')
+    .replace(/__([^_]+)__/g, '$1')
+    .replace(/_([^_]+)_/g, '$1')
+    // Remove links
+    .replace(/\[([^\]]+)\]\([^)]+\)/g, '$1')
+    // Remove images
+    .replace(/!\[([^\]]*)\]\([^)]+\)/g, '')
+    // Remove blockquotes
+    .replace(/^>\s+/gm, '')
+    // Remove lists
+    .replace(/^\s*[-*+]\s+/gm, '')
+    .replace(/^\s*\d+\.\s+/gm, '')
+    // Remove horizontal rules
+    .replace(/^---+$/gm, '')
+    // Remove extra whitespace and newlines
+    .replace(/\n\s*\n/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim()
+}
+
+// Article metadata component
+const ArticleMeta = ({ author, date, readTime }: { author: string; date: string; readTime: number }) => (
+  <Stack direction="row" spacing={1} alignItems="center" sx={{ mb: 2 }}>
+    <Typography variant="caption" color="text.secondary">
+      ARTICLE
+    </Typography>
+    <Typography variant="caption" color="text.secondary">
+      •
+    </Typography>
+    <Typography variant="caption" color="text.secondary">
+      {readTime} MINUTE READ
+    </Typography>
+  </Stack>
+)
 
 export default function Home() {
   const [latestPost, setLatestPost] = useState<BlogPost | null>(null)
   const [recentPosts, setRecentPosts] = useState<BlogPost[]>([])
-  const containerRef = useRef<HTMLDivElement | null>(null)
-  const aboutRef = useRef<HTMLDivElement | null>(null)
-
+  const [allPosts, setAllPosts] = useState<BlogPost[]>([])
+  const [visiblePosts, setVisiblePosts] = useState(6)
+  
+  const heroRef = useRef<HTMLDivElement>(null)
+  const aboutRef = useRef<HTMLDivElement>(null)
+  
+  const heroInView = useInView(heroRef, { once: true, margin: "-100px" })
   const aboutInView = useInView(aboutRef, { once: true, margin: "-100px" })
+
+  const { scrollYProgress } = useScroll()
+  const y = useTransform(scrollYProgress, [0, 1], ['0%', '50%'])
 
   useEffect(() => {
     const fetchPosts = async () => {
@@ -63,6 +112,7 @@ export default function Home() {
         if (data.posts && data.posts.length > 0) {
           setLatestPost(data.posts[0])
           setRecentPosts(data.posts.slice(1, 3))
+          setAllPosts(data.posts)
         }
       } catch (error) {
         console.error('Error fetching posts:', error)
@@ -72,521 +122,655 @@ export default function Home() {
     fetchPosts()
   }, [])
 
-
+  const loadMorePosts = () => {
+    setVisiblePosts(prev => prev + 6)
+  }
 
   return (
-    <div ref={containerRef} className="min-h-screen bg-gray-50 dark:bg-gray-900">
-      {/* Main Blog Section */}
-      <motion.div 
-        className="min-h-screen flex flex-col lg:flex-row items-stretch"
+    <Box sx={{ minHeight: '100vh', bgcolor: 'background.default' }}>
+      {/* Hero Section */}
+      <Box
+        ref={heroRef}
+        component={motion.div}
         initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
+        animate={{ opacity: heroInView ? 1 : 0 }}
         transition={{ duration: 0.8 }}
+        sx={{ 
+          minHeight: '100vh',
+          display: 'flex',
+          alignItems: 'center',
+          position: 'relative',
+          overflow: 'hidden',
+        }}
       >
-        {/* Left Panel */}
-        <motion.div 
-          className="w-full lg:w-1/2 bg-white dark:bg-gray-800 p-8 pb-12 flex flex-col justify-between relative min-h-screen lg:h-screen"
-          initial={{ y: -100, x: -100, opacity: 0 }}
-          animate={{ y: 0, x: 0, opacity: 1 }}
-          transition={{ duration: 0.8, delay: 0.2 }}
-        >
-          {/* Logo */}
-          <motion.div 
-            className="text-6xl font-bold text-gray-900 dark:text-white"
-            initial={{ y: -50, opacity: 0 }}
-            animate={{ y: 0, opacity: 1 }}
-            transition={{ duration: 0.6, delay: 0.4 }}
-          >
-            Deploy Diaries
-          </motion.div>
+        {/* Background Pattern */}
+        <Box
+          component={motion.div}
+          style={{ y }}
+          sx={{
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            background: 'linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%)',
+            opacity: 0.5,
+          }}
+        />
         
-        {/* Vertical Text */}
-        <div className="absolute left-8 top-1/2 -translate-y-1/2 -rotate-90 origin-left">
-          <span className="text-sm font-medium text-gray-600 dark:text-gray-400 tracking-widest">
-            PUB | MODERNIST
-          </span>
-        </div>
-        
-          {/* Description */}
-          <motion.div 
-            className="max-w-md ml-16"
-            initial={{ y: 50, opacity: 0 }}
-            animate={{ y: 0, opacity: 1 }}
-            transition={{ duration: 0.6, delay: 0.6 }}
-          >
-            <p className="text-gray-700 dark:text-gray-300 leading-relaxed mb-8">
-              A builder&apos;s notebook from the edge of the cloud. I document experiments, architectures, and lessons learned in the world of AWS — the good, the broken, and the beautifully optimized. Follow along as I turn trials into tutorials and concepts into code.
-            </p>
-          </motion.div>
-        
-                {/* Compact, unified SVG for cloud, lines, pulses, and servers */}
-        <div className="flex justify-center items-center mt-8 mb-4" style={{ minHeight: '200px' }}>
-          <div style={{ maxWidth: '300px', width: '100%' }}>
-            <svg
-              width="100%"
-              height="auto"
-              viewBox="0 0 180 160"
-              fill="none"
-              xmlns="http://www.w3.org/2000/svg"
-              style={{ display: 'block' }}
-            >
-              {/* Cloud shape at top center */}
-              <g>
-                <ellipse cx="90" cy="28" rx="36" ry="18" fill="url(#cloudGradient)" />
-                <ellipse cx="72" cy="26" rx="14" ry="10" fill="url(#cloudGradient)" />
-                <ellipse cx="108" cy="26" rx="14" ry="10" fill="url(#cloudGradient)" />
-                <ellipse cx="90" cy="18" rx="18" ry="10" fill="url(#cloudGradient)" />
-              </g>
-              <defs>
-                <linearGradient id="cloudGradient" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="0%" stopColor="#e0e7ef" />
-                  <stop offset="100%" stopColor="#b6c3d1" />
-                </linearGradient>
-              </defs>
-              {/* Lines from base of cloud (90,46) to server tops */}
-              <line x1="90" y1="46" x2="30" y2="100" stroke="#d1d5db" strokeWidth="2" />
-              <line x1="90" y1="46" x2="90" y2="100" stroke="#d1d5db" strokeWidth="2" />
-              <line x1="90" y1="46" x2="150" y2="100" stroke="#d1d5db" strokeWidth="2" />
-              {/* Pulses */}
-              <circle className="cloud-pulse-svg cloud-pulse-svg-0" r="5" fill="#38bdf8" filter="url(#glow)" >
-                <animate attributeName="cx" values="90;30" keyTimes="0;1" dur="2.5s" repeatCount="indefinite" />
-                <animate attributeName="cy" values="46;100" keyTimes="0;1" dur="2.5s" repeatCount="indefinite" />
-              </circle>
-              <circle className="cloud-pulse-svg cloud-pulse-svg-1" r="5" fill="#38bdf8" filter="url(#glow)">
-                <animate attributeName="cx" values="90;90" keyTimes="0;1" dur="2.5s" repeatCount="indefinite" begin="0.3s" />
-                <animate attributeName="cy" values="46;100" keyTimes="0;1" dur="2.5s" repeatCount="indefinite" begin="0.3s" />
-              </circle>
-              <circle className="cloud-pulse-svg cloud-pulse-svg-2" r="5" fill="#38bdf8" filter="url(#glow)">
-                <animate attributeName="cx" values="90;150" keyTimes="0;1" dur="2.5s" repeatCount="indefinite" begin="0.6s" />
-                <animate attributeName="cy" values="46;100" keyTimes="0;1" dur="2.5s" repeatCount="indefinite" begin="0.6s" />
-              </circle>
-              {/* Server boxes at endpoints */}
-              <g>
-                {/* Left server */}
-                <rect x="12" y="100" width="36" height="20" rx="6" fill="#f8fafc" stroke="#cbd5e1" strokeWidth="2" />
-                {/* Center server */}
-                <rect x="72" y="100" width="36" height="20" rx="6" fill="#f8fafc" stroke="#cbd5e1" strokeWidth="2" />
-                {/* Right server */}
-                <rect x="132" y="100" width="36" height="20" rx="6" fill="#f8fafc" stroke="#cbd5e1" strokeWidth="2" />
-                {/* Minimal server grid icon for each */}
-                {/* Left grid */}
-                <g>
-                  <rect x="22" y="104" width="6" height="6" rx="1" fill="#d1d5db"/>
-                  <rect x="30" y="104" width="6" height="6" rx="1" fill="#d1d5db"/>
-                  <rect x="22" y="112" width="6" height="6" rx="1" fill="#d1d5db"/>
-                  <rect x="30" y="112" width="6" height="6" rx="1" fill="#d1d5db"/>
-                </g>
-                {/* Center grid */}
-                <g>
-                  <rect x="82" y="104" width="6" height="6" rx="1" fill="#d1d5db"/>
-                  <rect x="90" y="104" width="6" height="6" rx="1" fill="#d1d5db"/>
-                  <rect x="82" y="112" width="6" height="6" rx="1" fill="#d1d5db"/>
-                  <rect x="90" y="112" width="6" height="6" rx="1" fill="#d1d5db"/>
-                </g>
-                {/* Right grid */}
-                <g>
-                  <rect x="142" y="104" width="6" height="6" rx="1" fill="#d1d5db"/>
-                  <rect x="150" y="104" width="6" height="6" rx="1" fill="#d1d5db"/>
-                  <rect x="142" y="112" width="6" height="6" rx="1" fill="#d1d5db"/>
-                  <rect x="150" y="112" width="6" height="6" rx="1" fill="#d1d5db"/>
-                </g>
-              </g>
-              <defs>
-                <filter id="glow" x="-20" y="-20" width="60" height="60">
-                  <feGaussianBlur stdDeviation="4" result="coloredBlur"/>
-                  <feMerge>
-                    <feMergeNode in="coloredBlur"/>
-                    <feMergeNode in="SourceGraphic"/>
-                  </feMerge>
-                </filter>
-              </defs>
-            </svg>
-          </div>
-        </div>
-        </motion.div>
-        
-        {/* Right Panel */}
-        <motion.div 
-          className="w-full lg:w-1/2 p-8 pb-12"
-          initial={{ y: 100, x: 100, opacity: 0 }}
-          animate={{ y: 0, x: 0, opacity: 1 }}
-          transition={{ duration: 0.8, delay: 0.3 }}
-        >
-          {/* Featured Article */}
-          {latestPost ? (
-            <motion.article 
-              className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-8 mb-8 max-h-[450px] overflow-hidden flex flex-col"
-              initial={{ y: 30, opacity: 0 }}
-              animate={{ y: 0, opacity: 1 }}
-              transition={{ duration: 0.6, delay: 0.5 }}
-              whileHover={{ y: -5, transition: { duration: 0.2 } }}
-            >
-            {latestPost.previewImage && (
-              <div className="w-full h-48 rounded-lg mb-6 overflow-hidden flex-shrink-0">
-                <img 
-                  src={latestPost.previewImage} 
-                  alt={`Preview for ${latestPost.title}`}
-                  className="w-full h-full object-cover"
-                />
-              </div>
-            )}
-            
-            <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-4 leading-tight flex-shrink-0">
-              {latestPost.title}
-            </h1>
-            
-            <div className="flex items-center text-gray-600 dark:text-gray-400 mb-6 flex-shrink-0">
-              <span className="font-medium">{latestPost.author}</span>
-              <span className="mx-2">•</span>
-              <span>{new Date(latestPost.createdAt).toLocaleDateString('en-US', { 
-                month: 'short', 
-                day: 'numeric',
-                year: 'numeric'
-              }).replace(',', '—')}</span>
-            </div>
-            
-            {/* Markdown Preview for Featured Article */}
-            <div className="prose prose-sm max-w-none dark:prose-invert prose-headings:text-gray-900 dark:prose-headings:text-white prose-p:text-gray-700 dark:prose-p:text-gray-300 mb-4 flex-1 overflow-hidden">
-              <div className="line-clamp-3" style={{display: '-webkit-box', WebkitLineClamp: 3, WebkitBoxOrient: 'vertical'}}>
-                <ReactMarkdown
-                  remarkPlugins={[remarkGfm, remarkBreaks, remarkMath]}
-                  rehypePlugins={[rehypeRaw, rehypeKatex, rehypeHighlight, rehypeSlug, rehypeAutolinkHeadings]}
-                    components={{
-                      h1: ({children}: MarkdownComponentProps) => <p className="text-lg font-bold text-gray-900 dark:text-white mb-2" style={{fontFamily: 'inherit'}}>{children}</p>, 
-                      h2: ({children}: MarkdownComponentProps) => <p className="text-base font-semibold text-gray-800 dark:text-gray-200 mb-1" style={{fontFamily: 'inherit'}}>{children}</p>, 
-                      h3: ({children}: MarkdownComponentProps) => <p className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-1" style={{fontFamily: 'inherit'}}>{children}</p>, 
-                      h4: ({children}: MarkdownComponentProps) => <p className="text-sm font-medium text-gray-600 dark:text-gray-400 mb-1" style={{fontFamily: 'inherit'}}>{children}</p>, 
-                      h5: ({children}: MarkdownComponentProps) => <p className="text-xs font-medium text-gray-500 dark:text-gray-500 mb-1" style={{fontFamily: 'inherit'}}>{children}</p>, 
-                      h6: ({children}: MarkdownComponentProps) => <p className="text-xs font-medium text-gray-400 dark:text-gray-600 mb-1" style={{fontFamily: 'inherit'}}>{children}</p>, 
-                      img: ({src, alt, ...props}) => (
-                        <div className="flex justify-center my-3">
-                          <img 
-                            src={src} 
-                            alt={alt} 
-                            className="max-w-full h-auto rounded-lg shadow-sm" 
-                            {...props} 
-                          />
-                        </div>
-                      ),
-                      table: () => <p className="text-gray-600 dark:text-gray-400 text-sm italic">[Table content]</p>,
-                      thead: ({children}: MarkdownComponentProps) => <span>{children}</span>,
-                      tbody: ({children}: MarkdownComponentProps) => <span>{children}</span>,
-                      tr: ({children}: MarkdownComponentProps) => <span>{children}</span>,
-                      th: ({children}: MarkdownComponentProps) => <span>{children}</span>,
-                      td: ({children}: MarkdownComponentProps) => <span>{children}</span>,
-                      pre: () => <p className="text-gray-600 dark:text-gray-400 text-sm italic">[Code block]</p>,
-                      code: InlineCode,
-                      ul: ({children}: MarkdownComponentProps) => <p className="text-gray-700 dark:text-gray-300 text-sm">{children}</p>,
-                      ol: ({children}: MarkdownComponentProps) => <p className="text-gray-700 dark:text-gray-300 text-sm">{children}</p>,
-                      li: ({children}: MarkdownComponentProps) => <span className="text-gray-700 dark:text-gray-300 text-sm">{children}</span>,
-                      blockquote: ({children}: MarkdownComponentProps) => <div className="text-gray-600 dark:text-gray-400 text-sm italic border-l-2 border-gray-300 dark:border-gray-600 pl-3">{children}</div>,
-                    }}
+        <Container maxWidth="xl" sx={{ position: 'relative', zIndex: 1 }}>
+          <Grid container spacing={8} alignItems="center" sx={{ minHeight: '80vh' }}>
+            {/* Left Side - Hero Content */}
+            <Grid item xs={12} lg={6}>
+              <Box
+                component={motion.div}
+                initial={{ x: -100, opacity: 0 }}
+                animate={{ x: heroInView ? 0 : -100, opacity: heroInView ? 1 : 0 }}
+                transition={{ duration: 0.8, delay: 0.2 }}
+              >
+                <Typography 
+                  variant="h1" 
+                  component="h1"
+                  sx={{ 
+                    mb: 3,
+                    fontWeight: 800,
+                    fontSize: { xs: '2.5rem', md: '4rem', lg: '5rem' },
+                    lineHeight: { xs: 1.2, md: 1.1 },
+                    background: 'linear-gradient(135deg, #0D1117 0%, #374151 100%)',
+                    WebkitBackgroundClip: 'text',
+                    WebkitTextFillColor: 'transparent',
+                    backgroundClip: 'text',
+                  }}
                 >
-                  {(latestPost?.excerpt || latestPost?.content?.substring(0, 200) + '...') ?? ''}
-                </ReactMarkdown>
-              </div>
-            </div>
-            
-            <Link 
-              href={`/blog/${latestPost.slug}`}
-              className="text-blue-600 dark:text-blue-400 hover:underline font-medium flex-shrink-0"
-            >
-              Read more
-              </Link>
-            </motion.article>
-          ) : (
-            <motion.article 
-              className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-8 mb-8"
-              initial={{ y: 30, opacity: 0 }}
-              animate={{ y: 0, opacity: 1 }}
-              transition={{ duration: 0.6, delay: 0.5 }}
-            >
-            <div className="text-center py-8">
-              <p className="text-gray-600 dark:text-gray-400 mb-4">No articles yet</p>
-              <Link
-                href="/write"
-                className="text-blue-600 dark:text-blue-400 hover:underline font-medium"
-              >
-                Write the first article
-              </Link>
-              </div>
-            </motion.article>
-          )}
-        
-          {/* Additional Articles Grid */}
-          <motion.div 
-            className="grid grid-cols-1 lg:grid-cols-2 gap-6"
-            initial={{ y: 50, opacity: 0 }}
-            animate={{ y: 0, opacity: 1 }}
-            transition={{ duration: 0.6, delay: 0.7 }}
-          >
-            {recentPosts.map((post, index) => (
-              <motion.article 
-                key={post.id} 
-                className="bg-white dark:bg-gray-800 rounded-lg shadow p-6 h-[224px] flex flex-col"
-                initial={{ y: 50, opacity: 0 }}
-                animate={{ y: 0, opacity: 1 }}
-                transition={{ duration: 0.5, delay: 0.8 + index * 0.1 }}
-                whileHover={{ y: -5, transition: { duration: 0.2 } }}
-              >
+                  Deploy Diaries
+                </Typography>
+                
+                <Typography 
+                  variant="h4" 
+                  component="h2"
+                  color="text.secondary"
+                  sx={{ 
+                    mb: 4,
+                    fontWeight: 400,
+                    fontSize: { xs: '1.25rem', md: '1.5rem' },
+                    lineHeight: 1.4,
+                  }}
+                >
+                  A builder's notebook from the edge of the cloud
+                </Typography>
+                
+                <Typography 
+                  variant="body1" 
+                  color="text.secondary"
+                  sx={{ 
+                    mb: 6,
+                    fontSize: '1.125rem',
+                    lineHeight: 1.6,
+                    maxWidth: '500px',
+                  }}
+                >
+                  I document experiments, architectures, and lessons learned in the world of AWS — 
+                  the good, the broken, and the beautifully optimized.
+                </Typography>
 
-              <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-3 flex-shrink-0 line-clamp-2" style={{display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', wordBreak: 'break-word', overflowWrap: 'break-word'}}>
-                {post.title}
-              </h3>
-              <div className="flex items-center text-sm text-gray-600 dark:text-gray-400 mb-4 flex-shrink-0">
-                <span className="font-medium">{post.author}</span>
-                <span className="mx-2">•</span>
-                <span>{new Date(post.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }).replace(',', '—')}</span>
-              </div>
-              <div className="prose prose-sm max-w-none dark:prose-invert prose-headings:text-gray-900 dark:prose-headings:text-white prose-p:text-gray-700 dark:prose-p:text-gray-300 mb-4 flex-1 overflow-hidden">
-                <div className="line-clamp-4 text-sm leading-relaxed" style={{display: '-webkit-box', WebkitLineClamp: 4, WebkitBoxOrient: 'vertical', wordBreak: 'break-word'}}>
-                  <ReactMarkdown
-                    remarkPlugins={[remarkGfm, remarkBreaks, remarkMath]}
-                    rehypePlugins={[rehypeRaw, rehypeKatex, rehypeHighlight, rehypeSlug, rehypeAutolinkHeadings]}
-                    components={{
-                      h1: ({children}: MarkdownComponentProps) => <p className="text-lg font-bold text-gray-900 dark:text-white mb-2" style={{fontFamily: 'inherit'}}>{children}</p>, 
-                      h2: ({children}: MarkdownComponentProps) => <p className="text-base font-semibold text-gray-800 dark:text-gray-200 mb-1" style={{fontFamily: 'inherit'}}>{children}</p>, 
-                      h3: ({children}: MarkdownComponentProps) => <p className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-1" style={{fontFamily: 'inherit'}}>{children}</p>, 
-                      h4: ({children}: MarkdownComponentProps) => <p className="text-sm font-medium text-gray-600 dark:text-gray-400 mb-1" style={{fontFamily: 'inherit'}}>{children}</p>, 
-                      h5: ({children}: MarkdownComponentProps) => <p className="text-xs font-medium text-gray-500 dark:text-gray-500 mb-1" style={{fontFamily: 'inherit'}}>{children}</p>, 
-                      h6: ({children}: MarkdownComponentProps) => <p className="text-xs font-medium text-gray-400 dark:text-gray-600 mb-1" style={{fontFamily: 'inherit'}}>{children}</p>, 
-                      img: ({src, alt, height, width, style, ...props}) => (
-                        <img 
-                          src={src} 
-                          alt={alt} 
-                          height={height}
-                          width={width}
-                          style={style}
-                          className="max-w-full rounded-lg shadow-sm block mx-auto my-3" 
-                          {...props} 
-                        />
-                      ),
-                      table: () => <p className="text-gray-600 dark:text-gray-400 text-sm italic">[Table content]</p>,
-                      thead: ({children}: MarkdownComponentProps) => <span>{children}</span>,
-                      tbody: ({children}: MarkdownComponentProps) => <span>{children}</span>,
-                      tr: ({children}: MarkdownComponentProps) => <span>{children}</span>,
-                      th: ({children}: MarkdownComponentProps) => <span>{children}</span>,
-                      td: ({children}: MarkdownComponentProps) => <span>{children}</span>,
-                      pre: () => <p className="text-gray-600 dark:text-gray-400 text-sm italic">[Code block]</p>,
-                      code: InlineCode,
-                      ul: ({children}: MarkdownComponentProps) => <p className="text-gray-700 dark:text-gray-300 text-sm">{children}</p>,
-                      ol: ({children}: MarkdownComponentProps) => <p className="text-gray-700 dark:text-gray-300 text-sm">{children}</p>,
-                      li: ({children}: MarkdownComponentProps) => <span className="text-gray-700 dark:text-gray-300 text-sm">{children}</span>,
-                      blockquote: ({children}: MarkdownComponentProps) => <div className="text-gray-600 dark:text-gray-400 text-sm italic border-l-2 border-gray-300 dark:border-gray-600 pl-3">{children}</div>,
-                      p: ({children}: MarkdownComponentProps) => <p className="text-gray-700 dark:text-gray-300 text-sm leading-relaxed" style={{wordBreak: 'break-word'}}>{children}</p>,
+                <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2}>
+                  <Button
+                    component={Link}
+                    href="/blog"
+                    variant="contained"
+                    size="large"
+                    endIcon={<ArrowForwardIcon />}
+                    sx={{
+                      bgcolor: 'primary.main',
+                      color: 'white',
+                      px: 4,
+                      py: 1.5,
+                      fontSize: '1rem',
+                      fontWeight: 600,
+                      borderRadius: 2,
+                      '&:hover': {
+                        bgcolor: 'primary.dark',
+                      },
                     }}
                   >
-                    {(post.excerpt || post.content?.substring(0, 150) + '...') ?? ''}
-                  </ReactMarkdown>
-                </div>
-              </div>
-              <Link 
-                href={`/blog/${post.slug}`}
-                className="text-blue-600 dark:text-blue-400 hover:underline flex-shrink-0"
-              >
-                Read more
-                </Link>
-              </motion.article>
-            ))}
+                    Explore Articles
+                  </Button>
+                  
+                  <Button
+                    component={Link}
+                    href="/about"
+                    variant="outlined"
+                    size="large"
+                    sx={{
+                      px: 4,
+                      py: 1.5,
+                      fontSize: '1rem',
+                      fontWeight: 600,
+                      borderRadius: 2,
+                      borderColor: 'grey.300',
+                      color: 'text.primary',
+                      '&:hover': {
+                        borderColor: 'primary.main',
+                        bgcolor: 'primary.main',
+                        color: 'white',
+                      },
+                    }}
+                  >
+                    About
+                  </Button>
+                </Stack>
+              </Box>
+            </Grid>
+
+             {/* Right Side - Featured Article */}
+             <Grid item xs={12} lg={6}>
+               <Box
+                 component={motion.div}
+                 initial={{ x: 100, opacity: 0 }}
+                 animate={{ x: heroInView ? 0 : 100, opacity: heroInView ? 1 : 0 }}
+                 transition={{ duration: 0.8, delay: 0.4 }}
+               >
+                 {latestPost ? (
+                   <Box
+                     component={motion.div}
+                     whileHover={{ y: -4, transition: { duration: 0.3 } }}
+                     sx={{
+                       height: '100%',
+                       maxHeight: '600px',
+                       cursor: 'pointer',
+                     }}
+                     onClick={() => window.location.href = `/blog/${latestPost.slug}`}
+                   >
+                     {/* Featured Article Header */}
+                     <Box sx={{ mb: 3 }}>
+                       <Chip 
+                         label="FEATURED ARTICLE" 
+                         size="small"
+                         sx={{ 
+                           bgcolor: 'secondary.main',
+                           color: 'white',
+                           fontWeight: 600,
+                           fontSize: '0.75rem',
+                           mb: 2,
+                         }} 
+                       />
+                       
+                       <Typography 
+                         variant="h3" 
+                         component="h2"
+                         sx={{ 
+                           mb: 3,
+                           fontWeight: 700,
+                           fontSize: { xs: '1.75rem', md: '2.25rem' },
+                           lineHeight: 1.2,
+                           color: 'text.primary',
+                           '&:hover': {
+                             color: 'primary.main',
+                           },
+                           transition: 'color 0.2s ease',
+                         }}
+                       >
+                         {latestPost.title}
+                       </Typography>
+
+                       {/* Author and Date */}
+                       <Stack direction="row" alignItems="center" spacing={2} sx={{ mb: 3 }}>
+                         <Avatar sx={{ width: 40, height: 40 }}>
+                           <PersonIcon />
+                         </Avatar>
+                         <Box>
+                           <Typography variant="subtitle1" sx={{ fontWeight: 600, lineHeight: 1.2 }}>
+                             {latestPost.author}
+                           </Typography>
+                           <Stack direction="row" alignItems="center" spacing={1}>
+                             <Typography variant="body2" color="text.secondary">
+                               {new Date(latestPost.createdAt).toLocaleDateString('en-US', { 
+                                 month: 'short', 
+                                 day: 'numeric',
+                                 year: 'numeric'
+                               })}
+                             </Typography>
+                             <Typography variant="body2" color="text.secondary">
+                               •
+                             </Typography>
+                             <Typography variant="body2" color="text.secondary">
+                               {calculateReadTime(latestPost.content)} min read
+                             </Typography>
+                           </Stack>
+                         </Box>
+                       </Stack>
+                     </Box>
+
+                     {/* Article Image */}
+                     {latestPost.previewImage && (
+                       <Box
+                         sx={{
+                           width: '100%',
+                           height: 240,
+                           mb: 3,
+                           borderRadius: 2,
+                           overflow: 'hidden',
+                           boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
+                         }}
+                       >
+                         <motion.img
+                           src={latestPost.previewImage}
+                           alt={latestPost.title}
+                           style={{
+                             width: '100%',
+                             height: '100%',
+                             objectFit: 'cover',
+                           }}
+                           whileHover={{ scale: 1.02 }}
+                           transition={{ duration: 0.3 }}
+                         />
+                       </Box>
+                     )}
+                     
+                     {/* Article Excerpt */}
+                     <Typography 
+                       variant="body1" 
+                       color="text.secondary"
+                       sx={{ 
+                         mb: 3,
+                         fontSize: '1.125rem',
+                         lineHeight: 1.6,
+                         display: '-webkit-box',
+                         WebkitLineClamp: 3,
+                         WebkitBoxOrient: 'vertical',
+                         overflow: 'hidden',
+                       }}
+                     >
+                       {latestPost.excerpt || (stripMarkdown(latestPost.content).substring(0, 200) + '...')}
+                     </Typography>
+                     
+                     {/* Read More Link */}
+                     <Typography
+                       component={Link}
+                       href={`/blog/${latestPost.slug}`}
+                       variant="body1"
+                       sx={{
+                         color: 'secondary.main',
+                         fontWeight: 600,
+                         textDecoration: 'underline',
+                         textDecorationColor: 'transparent',
+                         transition: 'text-decoration-color 0.2s ease',
+                         '&:hover': {
+                           textDecorationColor: 'secondary.main',
+                         },
+                       }}
+                       onClick={(e) => e.stopPropagation()}
+                     >
+                       Continue reading →
+                     </Typography>
+                   </Box>
+                 ) : (
+                   <Box
+                     sx={{
+                       p: 6,
+                       textAlign: 'center',
+                       height: '400px',
+                       display: 'flex',
+                       flexDirection: 'column',
+                       justifyContent: 'center',
+                       border: '2px dashed',
+                       borderColor: 'grey.300',
+                       borderRadius: 2,
+                     }}
+                   >
+                     <Typography variant="h5" color="text.secondary" sx={{ mb: 2 }}>
+                       No articles yet
+                     </Typography>
+                     <Typography variant="body1" color="text.secondary">
+                       The first article is coming soon...
+                     </Typography>
+                   </Box>
+                 )}
+               </Box>
+             </Grid>
+          </Grid>
+        </Container>
+      </Box>
+
+      {/* Recent Articles Section */}
+      <Container maxWidth="xl" sx={{ py: 12 }}>
+        <Box
+          component={motion.div}
+          initial={{ y: 50, opacity: 0 }}
+          whileInView={{ y: 0, opacity: 1 }}
+          transition={{ duration: 0.6 }}
+          viewport={{ once: true }}
+        >
+          <Typography 
+            variant="h2" 
+            component="h2"
+            sx={{ 
+              mb: 2,
+              fontWeight: 700,
+              textAlign: 'center',
+            }}
+          >
+            Recent Articles
+          </Typography>
           
-            {/* Fill empty slots if needed */}
-            {recentPosts.length === 0 && (
-              <>
-                <motion.article 
-                  className="bg-white dark:bg-gray-800 rounded-lg shadow p-6 h-[224px] flex flex-col"
-                  initial={{ y: 50, opacity: 0 }}
-                  animate={{ y: 0, opacity: 1 }}
-                  transition={{ duration: 0.5, delay: 0.8 }}
-                  whileHover={{ y: -5, transition: { duration: 0.2 } }}
-                >
-                  <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-3 flex-shrink-0 line-clamp-2" style={{display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', wordBreak: 'break-word', overflowWrap: 'break-word'}}>
-                    Minimalism in the Age of Excess: Aesthetic or Ideology?
-                  </h3>
-                  <div className="flex-1 overflow-hidden">
-                    <p className="text-gray-600 dark:text-gray-400 line-clamp-4" style={{display: '-webkit-box', WebkitLineClamp: 4, WebkitBoxOrient: 'vertical'}}>
-                      Exploring the intersection of design philosophy and lifestyle choices in our hyper-consumerist society...
-                    </p>
-                  </div>
-                  <Link 
-                    href="/blog/minimalism" 
-                    className="text-blue-600 dark:text-blue-400 hover:underline flex-shrink-0 mt-4"
-                  >
-                    Read more
-                  </Link>
-                </motion.article>
-              
-                <motion.article 
-                  className="bg-white dark:bg-gray-800 rounded-lg shadow p-6 h-[224px] flex flex-col"
-                  initial={{ y: 50, opacity: 0 }}
-                  animate={{ y: 0, opacity: 1 }}
-                  transition={{ duration: 0.5, delay: 0.9 }}
-                  whileHover={{ y: -5, transition: { duration: 0.2 } }}
-                >
-
-                  <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-3 flex-shrink-0 line-clamp-2" style={{display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', wordBreak: 'break-word', overflowWrap: 'break-word'}}>
-                    Slow Thinking in a Fast World: Why Deep Reflection is a Radical Act
-                  </h3>
-                  <div className="flex-1 overflow-hidden">
-                    <p className="text-gray-600 dark:text-gray-400 line-clamp-4" style={{display: '-webkit-box', WebkitLineClamp: 4, WebkitBoxOrient: 'vertical'}}>
-                      In an era of instant gratification and rapid information consumption, taking time to think deeply has become revolutionary...
-                    </p>
-                  </div>
-                  <Link 
-                    href="/blog/slow-thinking" 
-                    className="text-blue-400 hover:underline flex-shrink-0 mt-4"
-                  >
-                    Read more
-                  </Link>
-                </motion.article>
-              </>
-            )}
-          </motion.div>
-        
-          {/* Blog Link */}
-          <motion.div 
-            className="mt-8 text-center"
-            initial={{ y: 30, opacity: 0 }}
-            animate={{ y: 0, opacity: 1 }}
-            transition={{ duration: 0.5, delay: 1 }}
+          <Typography 
+            variant="body1" 
+            color="text.secondary"
+            sx={{ 
+              mb: 6,
+              textAlign: 'center',
+              maxWidth: '600px',
+              mx: 'auto',
+            }}
           >
-            <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-              <Link 
-                href="/blog" 
-                className="inline-flex items-center px-6 py-3 bg-gray-900 dark:bg-white text-white dark:text-gray-900 rounded-lg hover:bg-gray-800 dark:hover:bg-gray-100 transition-colors"
-              >
-                + BLOG
-              </Link>
-            </motion.div>
-          </motion.div>
-        </motion.div>
-      </motion.div>
+            Exploring the latest in cloud architecture, serverless computing, and developer experiences
+          </Typography>
+        </Box>
 
-      {/* About Section - Apple Style */}
-      <motion.div 
+         {allPosts.length > 0 ? (
+           <Grid container spacing={4}>
+             {allPosts.slice(0, visiblePosts).map((post, index) => (
+               <Grid item xs={12} md={6} lg={4} key={post.id}>
+                 <motion.div
+                   initial={{ y: 50, opacity: 0 }}
+                   whileInView={{ y: 0, opacity: 1 }}
+                   transition={{ duration: 0.5, delay: index * 0.1 }}
+                   viewport={{ once: true }}
+                   whileHover={{ y: -4, transition: { duration: 0.2 } }}
+                 >
+                   <Card
+                     sx={{
+                       height: 480, // Fixed height for consistency
+                       display: 'flex',
+                       flexDirection: 'column',
+                       border: '1px solid',
+                       borderColor: 'grey.200',
+                       cursor: 'pointer',
+                       transition: 'all 0.3s ease',
+                       '&:hover': {
+                         boxShadow: '0 10px 25px -5px rgba(0, 0, 0, 0.1)',
+                         borderColor: 'grey.300',
+                       },
+                     }}
+                     component={Link}
+                     href={`/blog/${post.slug}`}
+                     style={{ textDecoration: 'none', color: 'inherit' }}
+                   >
+                     {/* Image Container with Fixed Height */}
+                     <Box
+                       sx={{
+                         width: '100%',
+                         height: 200, // Fixed height
+                         overflow: 'hidden',
+                         bgcolor: 'grey.100',
+                         display: 'flex',
+                         alignItems: 'center',
+                         justifyContent: 'center',
+                       }}
+                     >
+                       {post.previewImage ? (
+                         <CardMedia
+                           component="img"
+                           image={post.previewImage}
+                           alt={post.title}
+                           sx={{ 
+                             width: '100%',
+                             height: '100%',
+                             objectFit: 'cover' 
+                           }}
+                         />
+                       ) : (
+                         <Box
+                           sx={{
+                             width: '100%',
+                             height: '100%',
+                             display: 'flex',
+                             alignItems: 'center',
+                             justifyContent: 'center',
+                             bgcolor: 'grey.200',
+                           }}
+                         >
+                           <Typography variant="body2" color="text.secondary">
+                             No Image
+                           </Typography>
+                         </Box>
+                       )}
+                     </Box>
+                     
+                     <CardContent sx={{ flexGrow: 1, p: 3, display: 'flex', flexDirection: 'column' }}>
+                       <ArticleMeta 
+                         author={post.author}
+                         date={new Date(post.createdAt).toLocaleDateString()}
+                         readTime={calculateReadTime(post.content)}
+                       />
+                       
+                       <Typography 
+                         variant="h6" 
+                         component="h3"
+                         sx={{ 
+                           mb: 2,
+                           fontWeight: 600,
+                           lineHeight: 1.3,
+                           display: '-webkit-box',
+                           WebkitLineClamp: 2,
+                           WebkitBoxOrient: 'vertical',
+                           overflow: 'hidden',
+                           height: '3.2em', // Fixed height for 2 lines
+                         }}
+                       >
+                         {post.title}
+                       </Typography>
+                       
+                       <Stack direction="row" alignItems="center" spacing={1} sx={{ mb: 2 }}>
+                         <Avatar sx={{ width: 20, height: 20 }}>
+                           <PersonIcon fontSize="small" />
+                         </Avatar>
+                         <Typography variant="body2" color="text.secondary">
+                           {post.author}
+                         </Typography>
+                       </Stack>
+                       
+                       <Typography 
+                         variant="body2" 
+                         color="text.secondary"
+                         sx={{ 
+                           display: '-webkit-box',
+                           WebkitLineClamp: 3,
+                           WebkitBoxOrient: 'vertical',
+                           overflow: 'hidden',
+                           lineHeight: 1.5,
+                           height: '4.5em', // Fixed height for 3 lines
+                           flexGrow: 1,
+                         }}
+                       >
+                         {post.excerpt || (stripMarkdown(post.content).substring(0, 150) + '...')}
+                       </Typography>
+
+                       {/* Read More Link at Bottom */}
+                       <Box sx={{ mt: 2, pt: 2, borderTop: '1px solid', borderColor: 'grey.100' }}>
+                         <Typography
+                           variant="body2"
+                           sx={{
+                             color: 'secondary.main',
+                             fontWeight: 600,
+                             fontSize: '0.875rem',
+                           }}
+                         >
+                           Continue reading →
+                         </Typography>
+                       </Box>
+                     </CardContent>
+                   </Card>
+                 </motion.div>
+               </Grid>
+             ))}
+           </Grid>
+        ) : (
+          <Box sx={{ textAlign: 'center', py: 8 }}>
+            <Typography variant="h6" color="text.secondary">
+              No articles available yet
+            </Typography>
+          </Box>
+        )}
+
+        {/* Load More Button */}
+        {allPosts.length > visiblePosts && (
+          <Box sx={{ textAlign: 'center', mt: 6 }}>
+            <Button
+              onClick={loadMorePosts}
+              variant="outlined"
+              size="large"
+              sx={{
+                px: 4,
+                py: 1.5,
+                fontSize: '1rem',
+                fontWeight: 600,
+                borderRadius: 2,
+                borderColor: 'grey.300',
+                color: 'text.primary',
+                '&:hover': {
+                  borderColor: 'primary.main',
+                  bgcolor: 'primary.main',
+                  color: 'white',
+                },
+              }}
+            >
+              Load More Articles
+            </Button>
+          </Box>
+        )}
+      </Container>
+
+      {/* About Section */}
+      <Box
         ref={aboutRef}
-        className="min-h-screen bg-white dark:bg-black flex items-center justify-center relative overflow-hidden"
+        component={motion.div}
         initial={{ opacity: 0 }}
         animate={{ opacity: aboutInView ? 1 : 0 }}
         transition={{ duration: 1 }}
+        sx={{
+          py: 12,
+          bgcolor: 'grey.50',
+          position: 'relative',
+          overflow: 'hidden',
+        }}
       >
-        {/* Background Pattern */}
-        <div className="absolute inset-0 bg-gradient-to-br from-gray-50 to-white dark:from-gray-900 dark:to-black opacity-50"></div>
-        
-        {/* Content Container */}
-        <div className="relative z-10 max-w-4xl mx-auto px-8 text-center">
-          <motion.div
-            initial={{ y: 100, opacity: 0 }}
-            animate={{ y: aboutInView ? 0 : 100, opacity: aboutInView ? 1 : 0 }}
-            transition={{ duration: 0.8, delay: 0.2 }}
-          >
-            <h2 className="text-4xl md:text-6xl lg:text-8xl font-thin text-gray-900 dark:text-white mb-8">
-              About
-            </h2>
-          </motion.div>
-          
-          <motion.div
-            initial={{ y: 100, opacity: 0 }}
-            animate={{ y: aboutInView ? 0 : 100, opacity: aboutInView ? 1 : 0 }}
-            transition={{ duration: 0.8, delay: 0.4 }}
-            className="space-y-8"
-          >
-            <p className="text-xl md:text-2xl lg:text-3xl font-light text-gray-700 dark:text-gray-300 leading-relaxed">
-              Building the future,<br />
-              one deployment at a time.
-            </p>
-            
-            <div className="max-w-2xl mx-auto">
-              <p className="text-base md:text-lg text-gray-600 dark:text-gray-400 leading-relaxed mb-6">
-                I&apos;m a cloud architect and developer passionate about creating scalable, 
-                resilient systems in the AWS ecosystem. My journey spans from startup 
-                experimentation to enterprise-grade infrastructure.
-              </p>
-              
-              <p className="text-base md:text-lg text-gray-600 dark:text-gray-400 leading-relaxed">
-                Through Deploy Diaries, I share the real stories behind the code—the 
-                victories, the failures, and the lessons learned in between. Every post 
-                is a glimpse into the iterative process of building something meaningful.
-              </p>
-            </div>
-          </motion.div>
-          
-          <motion.div
-            initial={{ y: 100, opacity: 0 }}
-            animate={{ y: aboutInView ? 0 : 100, opacity: aboutInView ? 1 : 0 }}
-            transition={{ duration: 0.8, delay: 0.6 }}
-            className="mt-16 flex flex-wrap justify-center gap-4 md:gap-8"
-          >
-            {['AWS', 'Serverless', 'DevOps', 'Infrastructure as Code', 'Microservices'].map((skill, index) => (
+        <Container maxWidth="lg">
+          <Grid container spacing={8} alignItems="center">
+            <Grid item xs={12} md={6}>
               <motion.div
-                key={skill}
-                className="px-4 md:px-6 py-2 md:py-3 bg-gray-100 dark:bg-gray-800 rounded-full text-sm md:text-base text-gray-700 dark:text-gray-300 font-medium"
-                initial={{ scale: 0, opacity: 0 }}
-                animate={{ scale: aboutInView ? 1 : 0, opacity: aboutInView ? 1 : 0 }}
-                transition={{ duration: 0.4, delay: 0.8 + index * 0.1 }}
-                whileHover={{ scale: 1.05 }}
+                initial={{ x: -50, opacity: 0 }}
+                animate={{ x: aboutInView ? 0 : -50, opacity: aboutInView ? 1 : 0 }}
+                transition={{ duration: 0.8, delay: 0.2 }}
               >
-                {skill}
+                <Typography 
+                  variant="h2" 
+                  component="h2"
+                  sx={{ 
+                    mb: 4,
+                    fontWeight: 700,
+                  }}
+                >
+                  Building the future,<br />
+                  one deployment at a time.
+                </Typography>
+                
+                <Typography 
+                  variant="body1" 
+                  color="text.secondary"
+                  sx={{ 
+                    mb: 4,
+                    fontSize: '1.125rem',
+                    lineHeight: 1.6,
+                  }}
+                >
+                  I'm a cloud architect and developer passionate about creating scalable, 
+                  resilient systems in the AWS ecosystem. Through Deploy Diaries, I share 
+                  the real stories behind the code—the victories, failures, and lessons learned.
+                </Typography>
+
+                <Stack direction="row" flexWrap="wrap" spacing={1} sx={{ mb: 4 }}>
+                  {['AWS', 'Serverless', 'DevOps', 'Infrastructure as Code'].map((skill, index) => (
+                    <motion.div
+                      key={skill}
+                      initial={{ scale: 0, opacity: 0 }}
+                      animate={{ scale: aboutInView ? 1 : 0, opacity: aboutInView ? 1 : 0 }}
+                      transition={{ duration: 0.4, delay: 0.6 + index * 0.1 }}
+                    >
+                      <Chip 
+                        label={skill} 
+                        sx={{ 
+                          bgcolor: 'white',
+                          color: 'text.primary',
+                          fontWeight: 500,
+                        }} 
+                      />
+                    </motion.div>
+                  ))}
+                </Stack>
+
+                <Button
+                  component={Link}
+                  href="/contact"
+                  variant="contained"
+                  size="large"
+                  sx={{
+                    bgcolor: 'primary.main',
+                    color: 'white',
+                    px: 4,
+                    py: 1.5,
+                    fontSize: '1rem',
+                    fontWeight: 600,
+                    borderRadius: 2,
+                  }}
+                >
+                  Get in Touch
+                </Button>
               </motion.div>
-            ))}
-          </motion.div>
-          
-          <motion.div
-            initial={{ y: 50, opacity: 0 }}
-            animate={{ y: aboutInView ? 0 : 50, opacity: aboutInView ? 1 : 0 }}
-            transition={{ duration: 0.8, delay: 1 }}
-            className="mt-16"
-          >
-            <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-              <Link
-                href="/contact"
-                className="inline-flex items-center px-6 md:px-8 py-3 md:py-4 bg-black dark:bg-white text-white dark:text-black rounded-full text-base md:text-lg font-medium hover:bg-gray-800 dark:hover:bg-gray-200 transition-colors"
+            </Grid>
+            
+            <Grid item xs={12} md={6}>
+              <motion.div
+                initial={{ x: 50, opacity: 0 }}
+                animate={{ x: aboutInView ? 0 : 50, opacity: aboutInView ? 1 : 0 }}
+                transition={{ duration: 0.8, delay: 0.4 }}
               >
-                Get in touch
-              </Link>
-            </motion.div>
-          </motion.div>
-        </div>
-        
-        {/* Floating Elements */}
-        <motion.div
-          className="absolute top-20 left-20 w-4 h-4 bg-blue-500 rounded-full opacity-20 hidden md:block"
-          animate={{ 
-            y: [0, -20, 0],
-            scale: [1, 1.2, 1]
-          }}
-          transition={{ 
-            duration: 3, 
-            repeat: Infinity,
-            repeatType: "loop"
-          }}
-        />
-        <motion.div
-          className="absolute bottom-32 right-32 w-6 h-6 bg-green-500 rounded-full opacity-20 hidden md:block"
-          animate={{ 
-            y: [0, -30, 0],
-            scale: [1, 0.8, 1]
-          }}
-          transition={{ 
-            duration: 4, 
-            repeat: Infinity,
-            repeatType: "loop",
-            delay: 1
-          }}
-        />
-        <motion.div
-          className="absolute top-1/2 right-20 w-3 h-3 bg-purple-500 rounded-full opacity-20 hidden md:block"
-          animate={{ 
-            x: [0, -15, 0],
-            scale: [1, 1.3, 1]
-          }}
-          transition={{ 
-            duration: 5, 
-            repeat: Infinity,
-            repeatType: "loop",
-            delay: 2
-          }}
-        />
-      </motion.div>
-    </div>
+                <Paper
+                  sx={{
+                    p: 6,
+                    bgcolor: 'white',
+                    border: '1px solid',
+                    borderColor: 'grey.200',
+                    borderRadius: 3,
+                  }}
+                >
+                  <Typography variant="h6" sx={{ mb: 3, fontWeight: 600 }}>
+                    Recent Focus Areas
+                  </Typography>
+                  
+                  <Stack spacing={3}>
+                    {[
+                      { title: 'Serverless Architecture', desc: 'Building scalable applications with AWS Lambda and API Gateway' },
+                      { title: 'Infrastructure as Code', desc: 'Automating deployments with CloudFormation and CDK' },
+                      { title: 'DevOps Practices', desc: 'CI/CD pipelines and monitoring strategies' },
+                    ].map((item, index) => (
+                      <Box key={item.title}>
+                        <Typography variant="subtitle1" sx={{ fontWeight: 600, mb: 1 }}>
+                          {item.title}
+                        </Typography>
+                        <Typography variant="body2" color="text.secondary">
+                          {item.desc}
+                        </Typography>
+                        {index < 2 && <Divider sx={{ mt: 2 }} />}
+                      </Box>
+                    ))}
+                  </Stack>
+                </Paper>
+              </motion.div>
+            </Grid>
+          </Grid>
+        </Container>
+      </Box>
+    </Box>
   )
 }

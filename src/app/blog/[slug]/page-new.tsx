@@ -147,7 +147,7 @@ const CodeBlock = ({ children, className, ...props }: React.ComponentProps<'pre'
   }
 
   return (
-    <Box sx={{ position: 'relative', my: 3, width: '100%', maxWidth: '100%' }}>
+    <Box sx={{ position: 'relative', my: 3 }}>
       <Box sx={{ position: 'absolute', top: 12, right: 12, zIndex: 1 }}>
         <Button
           onClick={copyToClipboard}
@@ -177,27 +177,11 @@ const CodeBlock = ({ children, className, ...props }: React.ComponentProps<'pre'
           borderColor: 'grey.200',
           borderRadius: 2,
           overflow: 'auto',
-          overflowX: 'auto',
           fontFamily: 'monospace',
           fontSize: '0.875rem',
-          width: '100%',
-          maxWidth: '100%',
-          minWidth: 0,
-          whiteSpace: 'pre',
-          wordBreak: 'normal',
-          overflowWrap: 'normal',
         }}
       >
-        <code 
-          {...props}
-          style={{
-            display: 'block',
-            width: '100%',
-            whiteSpace: 'pre',
-            wordBreak: 'normal',
-            overflowWrap: 'normal',
-          }}
-        >
+        <code {...props}>
           {children}
         </code>
       </Paper>
@@ -207,39 +191,21 @@ const CodeBlock = ({ children, className, ...props }: React.ComponentProps<'pre'
 
 // Custom Inline Code Component
 const InlineCode = ({ children, ...props }: React.ComponentProps<'code'>) => {
-  const codeRef = useRef<HTMLElement>(null)
-  const [isBlockCode, setIsBlockCode] = useState(false)
-  
-  useEffect(() => {
-    if (codeRef.current) {
-      // Check if the code element is inside a pre tag
-      const parentPre = codeRef.current.closest('pre')
-      setIsBlockCode(!!parentPre)
-    }
-  }, [])
-  
-  // Always render as plain code element to avoid truncation issues
-  // The styling will be handled by the parent CodeBlock component for block code
   return (
-    <code 
-      ref={codeRef}
-      {...props}
-      style={{
-        display: isBlockCode ? 'block' : 'inline',
-        width: isBlockCode ? '100%' : 'auto',
-        whiteSpace: isBlockCode ? 'pre' : 'pre-wrap',
-        wordBreak: 'normal',
-        overflowWrap: 'normal',
-        fontFamily: 'monospace',
+    <Chip 
+      label={children}
+      size="small"
+      sx={{ 
+        height: 'auto',
+        px: 0.5,
+        py: 0.25,
         fontSize: '0.875rem',
-        backgroundColor: isBlockCode ? 'transparent' : '#f5f5f5',
-        padding: isBlockCode ? '0' : '2px 4px',
-        borderRadius: isBlockCode ? '0' : '4px',
-        border: isBlockCode ? 'none' : '1px solid #e0e0e0',
+        fontFamily: 'monospace',
+        bgcolor: 'grey.100',
+        color: 'text.primary',
       }}
-    >
-      {children}
-    </code>
+      {...props}
+    />
   )
 }
 
@@ -328,6 +294,9 @@ export default function BlogPostPage() {
 
   const contentRef = useRef<HTMLDivElement>(null)
   const authorRef = useRef<HTMLDivElement>(null)
+  
+  const contentInView = useInView(contentRef, { once: true, margin: "-100px" })
+  const authorInView = useInView(authorRef, { once: true, margin: "-100px" })
 
   useEffect(() => {
     const fetchPost = async () => {
@@ -449,12 +418,12 @@ export default function BlogPostPage() {
       )}
 
       {/* Article Content */}
-      <Container maxWidth="md" sx={{ py: 6, px: { xs: 2, sm: 3, md: 4 }, overflow: 'visible' }}>
+      <Container maxWidth="md" sx={{ py: 6 }}>
         <motion.div
           ref={contentRef}
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5 }}
+          initial={{ y: 50, opacity: 0 }}
+          animate={{ y: contentInView ? 0 : 50, opacity: contentInView ? 1 : 0 }}
+          transition={{ duration: 0.6 }}
         >
           {/* Article Meta */}
           <ArticleMeta 
@@ -521,125 +490,54 @@ export default function BlogPostPage() {
           </Stack>
 
           {/* Content */}
-          <Box 
-            sx={{ 
-              width: '100%',
-              overflow: 'visible',
-              '& p': {
-                marginBottom: '1.5rem',
-                lineHeight: 1.7,
-                fontSize: '1.125rem',
-                color: 'text.primary',
-              },
-              '& h1, & h2, & h3, & h4, & h5, & h6': {
-                color: 'text.primary',
-                fontWeight: 'bold',
-                marginTop: '2rem',
-                marginBottom: '1rem',
-              },
-              '& h1': { fontSize: '2.5rem' },
-              '& h2': { fontSize: '2rem' },
-              '& h3': { fontSize: '1.75rem' },
-              '& h4': { fontSize: '1.5rem' },
-              '& h5': { fontSize: '1.25rem' },
-              '& h6': { fontSize: '1rem' },
-              '& ul, & ol': {
-                marginBottom: '1.5rem',
-                paddingLeft: '1.5rem',
-              },
-              '& li': {
-                marginBottom: '0.5rem',
-                lineHeight: 1.6,
-              },
-              '& a': {
-                color: 'primary.main',
-                textDecoration: 'underline',
-                '&:hover': {
-                  color: 'primary.dark',
-                },
-              },
-              '& img': {
-                maxWidth: '100%',
-                height: 'auto',
-                margin: '2rem auto',
-                display: 'block',
-                borderRadius: '8px',
-              },
-              '& svg': {
-                maxWidth: '100%',
-                height: 'auto',
-              },
-              '& .mermaid': {
-                maxWidth: '100%',
-                overflow: 'auto',
-              },
-              '& blockquote': {
-                borderLeft: '4px solid',
-                borderColor: 'primary.main',
-                paddingLeft: '1.5rem',
-                paddingTop: '1rem',
-                paddingBottom: '1rem',
-                marginY: '2rem',
-                backgroundColor: 'grey.50',
-                fontStyle: 'italic',
-                borderRadius: '0 8px 8px 0',
-              },
-              '& table': {
-                width: '100%',
-                borderCollapse: 'collapse',
-                marginY: '2rem',
-                '& th, & td': {
-                  border: '1px solid',
-                  borderColor: 'grey.300',
-                  padding: '0.75rem',
-                  textAlign: 'left',
-                },
-                '& th': {
-                  backgroundColor: 'grey.100',
-                  fontWeight: 'bold',
-                },
-              },
-            }}
-          >
+          <Box sx={{ 
+            '& .prose': {
+              maxWidth: 'none',
+              color: 'text.primary',
+              lineHeight: 1.7,
+              fontSize: '1.125rem',
+            }
+          }}>
             <ReactMarkdown
               remarkPlugins={[remarkGfm, remarkBreaks, remarkMath]}
               rehypePlugins={[rehypeRaw, rehypeKatex, rehypeHighlight, rehypeSlug, rehypeAutolinkHeadings]}
               components={{
-                h1: (props) => <h1 className="text-4xl mb-6 mt-10 text-black font-extrabold" style={{fontFamily: 'inherit'}} {...props} />, 
-                h2: (props) => <h2 className="text-3xl mb-5 mt-8 text-gray-800 font-bold" style={{fontFamily: 'inherit'}} {...props} />, 
-                h3: (props) => <h3 className="text-2xl mb-4 mt-6 text-gray-700 font-semibold" style={{fontFamily: 'inherit'}} {...props} />, 
-                h4: (props) => <h4 className="text-base mb-1 mt-1 text-gray-600 font-medium" style={{fontFamily: 'inherit'}} {...props} />, 
-                h5: (props) => <h5 className="text-sm mb-1 mt-1 text-gray-500 font-medium" style={{fontFamily: 'inherit'}} {...props} />, 
-                h6: (props) => <h6 className="text-xs mb-1 mt-1 text-gray-400 font-medium uppercase tracking-wider" style={{fontFamily: 'inherit'}} {...props} />, 
-                a: ({...props}) => <a className="text-blue-600 dark:text-blue-400 underline hover:text-blue-800 dark:hover:text-blue-300 transition-colors" {...props} />,
-                img: ({src, alt, height, width, style, ...props}) => (
-                  <img 
-                    src={src} 
-                    alt={alt} 
-                    height={height}
-                    width={width}
-                    style={style}
-                    className="max-w-full rounded-lg shadow-md block mx-auto my-6" 
-                    {...props} 
-                  />
+                h1: (props) => <Typography variant="h3" component="h1" sx={{ mt: 6, mb: 3, fontWeight: 700 }} {...props} />,
+                h2: (props) => <Typography variant="h4" component="h2" sx={{ mt: 5, mb: 2, fontWeight: 600 }} {...props} />,
+                h3: (props) => <Typography variant="h5" component="h3" sx={{ mt: 4, mb: 2, fontWeight: 600 }} {...props} />,
+                p: (props) => <Typography variant="body1" sx={{ mb: 3, lineHeight: 1.7, fontSize: '1.125rem' }} {...props} />,
+                a: (props) => <Typography component="a" sx={{ color: 'secondary.main', textDecoration: 'underline', '&:hover': { color: 'secondary.dark' } }} {...props} />,
+                img: (props) => (
+                  <Box sx={{ my: 4, textAlign: 'center' }}>
+                    <img 
+                      {...props}
+                      style={{ 
+                        maxWidth: '100%',
+                        height: 'auto',
+                        borderRadius: '12px',
+                        boxShadow: '0 4px 12px rgba(0,0,0,0.1)'
+                      }}
+                    />
+                  </Box>
                 ),
-                table: (props) => <table className="w-full border-collapse border border-gray-300 dark:border-gray-600 my-4" {...props} />,
-                thead: (props) => <thead className="bg-gray-50 dark:bg-gray-700" {...props} />,
-                tbody: (props) => <tbody className="divide-y divide-gray-200 dark:divide-gray-600" {...props} />,
-                tr: (props) => <tr className="hover:bg-gray-50 dark:hover:bg-gray-600" {...props} />,
-                th: (props) => <th className="border border-gray-300 dark:border-gray-600 px-4 py-2 text-left font-semibold text-gray-900 dark:text-gray-100" {...props} />,
-                td: (props) => <td className="border border-gray-300 dark:border-gray-600 px-4 py-2 text-gray-700 dark:text-gray-300" {...props} />,
                 pre: CodeBlock,
                 code: InlineCode,
                 blockquote: (props) => (
-                  <blockquote 
-                    className="border-l-4 border-gray-300 dark:border-gray-600 pl-6 py-4 my-6 bg-gray-50 dark:bg-gray-800 rounded-r-lg italic text-gray-700 dark:text-gray-300 text-lg leading-relaxed" 
+                  <Paper
+                    sx={{
+                      p: 3,
+                      my: 3,
+                      bgcolor: 'grey.50',
+                      borderLeft: '4px solid',
+                      borderColor: 'secondary.main',
+                      fontStyle: 'italic',
+                    }}
                     {...props}
                   />
                 ),
-                ul: (props) => <ul className="list-disc list-inside space-y-1 my-4 text-gray-700 dark:text-gray-300" {...props} />,
-                ol: (props) => <ol className="list-decimal list-outside space-y-1 my-4 text-gray-700 dark:text-gray-300 ml-4" {...props} />,
-                li: (props) => <li className="text-gray-700 dark:text-gray-300" {...props} />,
+                ul: (props) => <Box component="ul" sx={{ mb: 3, pl: 3 }} {...props} />,
+                ol: (props) => <Box component="ol" sx={{ mb: 3, pl: 3 }} {...props} />,
+                li: (props) => <Typography component="li" sx={{ mb: 1, lineHeight: 1.6 }} {...props} />,
               }}
             >
               {post.content}
@@ -658,10 +556,9 @@ export default function BlogPostPage() {
         <Container maxWidth="md">
           <motion.div
             ref={authorRef}
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5 }}
-            viewport={{ once: true }}
+            initial={{ y: 50, opacity: 0 }}
+            animate={{ y: authorInView ? 0 : 50, opacity: authorInView ? 1 : 0 }}
+            transition={{ duration: 0.6 }}
           >
             <Paper sx={{ p: 4, borderRadius: 3 }}>
               <Stack direction={{ xs: 'column', sm: 'row' }} spacing={3} alignItems={{ xs: 'center', sm: 'flex-start' }}>
