@@ -12,10 +12,9 @@ datasource db {
 }
 
 model Article {
-  id        Int      @id @default(autoincrement())
+  id        Int      @default(autoincrement()) @id
   title     String
   content   String
-  excerpt   String?
   slug      String   @unique
   createdAt DateTime @default(now())
   author    String
