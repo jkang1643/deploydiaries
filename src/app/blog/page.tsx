@@ -9,9 +9,7 @@ import {
   Typography,
   Card,
   CardContent,
-  CardMedia,
   Button,
-  Chip,
   Avatar,
   Grid,
   Stack,
@@ -53,7 +51,7 @@ const calculateReadTime = (content: string): number => {
 }
 
 // Article metadata component
-const ArticleMeta = ({ author, date, readTime }: { author: string; date: string; readTime: number }) => (
+const ArticleMeta = ({ readTime }: { readTime: number }) => (
   <Stack direction="row" spacing={1} alignItems="center" sx={{ mb: 2 }}>
     <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 600, textTransform: 'uppercase', letterSpacing: 1 }}>
       ARTICLE
@@ -67,36 +65,7 @@ const ArticleMeta = ({ author, date, readTime }: { author: string; date: string;
   </Stack>
 )
 
-// Strip markdown formatting and return plain text for previews
-const stripMarkdown = (markdown: string): string => {
-  return markdown
-    // Remove code blocks
-    .replace(/```[\s\S]*?```/g, '')
-    // Remove inline code
-    .replace(/`([^`]+)`/g, '$1')
-    // Remove headers
-    .replace(/^#{1,6}\s+/gm, '')
-    // Remove bold/italic
-    .replace(/\*\*([^*]+)\*\*/g, '$1')
-    .replace(/\*([^*]+)\*/g, '$1')
-    .replace(/__([^_]+)__/g, '$1')
-    .replace(/_([^_]+)_/g, '$1')
-    // Remove links
-    .replace(/\[([^\]]+)\]\([^)]+\)/g, '$1')
-    // Remove images
-    .replace(/!\[([^\]]*)\]\([^)]+\)/g, '')
-    // Remove blockquotes
-    .replace(/^>\s+/gm, '')
-    // Remove lists
-    .replace(/^\s*[-*+]\s+/gm, '')
-    .replace(/^\s*\d+\.\s+/gm, '')
-    // Remove horizontal rules
-    .replace(/^---+$/gm, '')
-    // Remove extra whitespace and newlines
-    .replace(/\n\s*\n/g, ' ')
-    .replace(/\s+/g, ' ')
-    .trim()
-}
+import { generateExcerpt } from '@/lib/excerpt'
 
 export default function BlogPage() {
   const [posts, setPosts] = useState<BlogPost[]>([])
@@ -192,7 +161,7 @@ export default function BlogPage() {
                 Deploy Diaries
               </Typography>
               <Typography variant="h6" color="text.secondary" sx={{ mt: 1 }}>
-                A builder's notebook from the edge of the cloud
+                A builder&apos;s notebook from the edge of the cloud
               </Typography>
             </Box>
             
@@ -305,7 +274,7 @@ export default function BlogPage() {
                   </Typography>
                   <Typography variant="body2" color="text.secondary">
                     {posts.length === 0 
-                      ? 'Be the first to write an article!' 
+                      ? 'Be the first to write an article!'
                       : 'Try adjusting your search or filter criteria.'
                     }
                   </Typography>
@@ -383,8 +352,6 @@ export default function BlogPage() {
                             >
                               <Box sx={{ flexGrow: 1 }}>
                                 <ArticleMeta 
-                                  author={post.author}
-                                  date={new Date(post.createdAt).toLocaleDateString()}
                                   readTime={calculateReadTime(post.content)}
                                 />
                                 
@@ -427,7 +394,7 @@ export default function BlogPage() {
                                     minHeight: viewMode === 'grid' ? '4.5em' : 'auto',
                                   }}
                                 >
-                                  {post.excerpt || (stripMarkdown(post.content).substring(0, 150) + '...')}
+                                  {post.excerpt || generateExcerpt(post.content, 150)}
                                 </Typography>
                               </Box>
 

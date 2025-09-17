@@ -19,7 +19,6 @@ import {
   Divider,
 } from '@mui/material'
 import { 
-  AccessTime as AccessTimeIcon,
   ArrowForward as ArrowForwardIcon,
   Person as PersonIcon,
 } from '@mui/icons-material'
@@ -43,39 +42,10 @@ const calculateReadTime = (content: string): number => {
   return Math.ceil(words / wordsPerMinute)
 }
 
-// Strip markdown formatting and return plain text for previews
-const stripMarkdown = (markdown: string): string => {
-  return markdown
-    // Remove code blocks
-    .replace(/```[\s\S]*?```/g, '')
-    // Remove inline code
-    .replace(/`([^`]+)`/g, '$1')
-    // Remove headers
-    .replace(/^#{1,6}\s+/gm, '')
-    // Remove bold/italic
-    .replace(/\*\*([^*]+)\*\*/g, '$1')
-    .replace(/\*([^*]+)\*/g, '$1')
-    .replace(/__([^_]+)__/g, '$1')
-    .replace(/_([^_]+)_/g, '$1')
-    // Remove links
-    .replace(/\[([^\]]+)\]\([^)]+\)/g, '$1')
-    // Remove images
-    .replace(/!\[([^\]]*)\]\([^)]+\)/g, '')
-    // Remove blockquotes
-    .replace(/^>\s+/gm, '')
-    // Remove lists
-    .replace(/^\s*[-*+]\s+/gm, '')
-    .replace(/^\s*\d+\.\s+/gm, '')
-    // Remove horizontal rules
-    .replace(/^---+$/gm, '')
-    // Remove extra whitespace and newlines
-    .replace(/\n\s*\n/g, ' ')
-    .replace(/\s+/g, ' ')
-    .trim()
-}
+import { generateExcerpt } from '@/lib/excerpt'
 
 // Article metadata component
-const ArticleMeta = ({ author, date, readTime }: { author: string; date: string; readTime: number }) => (
+const ArticleMeta = ({ readTime }: { readTime: number }) => (
   <Stack direction="row" spacing={1} alignItems="center" sx={{ mb: 2 }}>
     <Typography variant="caption" color="text.secondary">
       ARTICLE
@@ -91,7 +61,7 @@ const ArticleMeta = ({ author, date, readTime }: { author: string; date: string;
 
 export default function Home() {
   const [latestPost, setLatestPost] = useState<BlogPost | null>(null)
-  const [recentPosts, setRecentPosts] = useState<BlogPost[]>([])
+  const [, setRecentPosts] = useState<BlogPost[]>([])
   const [allPosts, setAllPosts] = useState<BlogPost[]>([])
   const [visiblePosts, setVisiblePosts] = useState(6)
   
@@ -196,7 +166,7 @@ export default function Home() {
                     lineHeight: 1.4,
                   }}
                 >
-                  A builder's notebook from the edge of the cloud
+                  A builder&apos;s notebook from the edge of the cloud
                 </Typography>
                 
                 <Typography 
@@ -381,7 +351,7 @@ export default function Home() {
                          overflow: 'hidden',
                        }}
                      >
-                       {latestPost.excerpt || (stripMarkdown(latestPost.content).substring(0, 200) + '...')}
+                        {latestPost.excerpt || generateExcerpt(latestPost.content, 200)}
                      </Typography>
                      
                      {/* Read More Link */}
@@ -539,8 +509,6 @@ export default function Home() {
                      
                      <CardContent sx={{ flexGrow: 1, p: 3, display: 'flex', flexDirection: 'column' }}>
                        <ArticleMeta 
-                         author={post.author}
-                         date={new Date(post.createdAt).toLocaleDateString()}
                          readTime={calculateReadTime(post.content)}
                        />
                        
@@ -583,7 +551,7 @@ export default function Home() {
                            flexGrow: 1,
                          }}
                        >
-                         {post.excerpt || (stripMarkdown(post.content).substring(0, 150) + '...')}
+                         {post.excerpt || generateExcerpt(post.content, 150)}
                        </Typography>
 
                        {/* Read More Link at Bottom */}
@@ -684,7 +652,7 @@ export default function Home() {
                     lineHeight: 1.6,
                   }}
                 >
-                  I'm a cloud architect and developer passionate about creating scalable, 
+                  I&apos;m a cloud architect and developer passionate about creating scalable, 
                   resilient systems in the AWS ecosystem. Through Deploy Diaries, I share 
                   the real stories behind the code—the victories, failures, and lessons learned.
                 </Typography>

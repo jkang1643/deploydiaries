@@ -15,6 +15,7 @@ model Article {
   id        Int      @id @default(autoincrement())
   title     String
   content   String
+  excerpt   String?
   slug      String   @unique
   createdAt DateTime @default(now())
   author    String

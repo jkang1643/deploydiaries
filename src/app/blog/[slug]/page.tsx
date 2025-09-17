@@ -3,7 +3,8 @@
 import React, { useState, useEffect, useRef } from 'react'
 import { useParams } from 'next/navigation'
 import Link from 'next/link'
-import { motion, useInView } from 'framer-motion'
+import Image from 'next/image'
+import { motion } from 'framer-motion'
 import {
   Box,
   Container,
@@ -12,7 +13,6 @@ import {
   CardContent,
   CardMedia,
   Button,
-  Chip,
   Avatar,
   Grid,
   Stack,
@@ -20,7 +20,6 @@ import {
   IconButton,
   Fab,
   Tooltip,
-  Divider,
   TextField,
   List,
   ListItem,
@@ -30,12 +29,8 @@ import {
 import {
   Favorite as FavoriteIcon,
   FavoriteBorder as FavoriteBorderIcon,
-  Share as ShareIcon,
-  Comment as CommentIcon,
   Person as PersonIcon,
   ArrowBack as ArrowBackIcon,
-  ArrowForward as ArrowForwardIcon,
-  AccessTime as AccessTimeIcon,
   Twitter as TwitterIcon,
   LinkedIn as LinkedInIcon,
   Link as LinkIcon,
@@ -114,7 +109,7 @@ const stripMarkdown = (markdown: string): string => {
 }
 
 // Custom Code Block Component with Copy Functionality
-const CodeBlock = ({ children, className, ...props }: React.ComponentProps<'pre'>) => {
+const CodeBlock = ({ children, ...props }: React.ComponentProps<'pre'>) => {
   const [copied, setCopied] = useState(false)
   
   const copyToClipboard = async () => {
@@ -244,7 +239,7 @@ const InlineCode = ({ children, ...props }: React.ComponentProps<'code'>) => {
 }
 
 // Article metadata component
-const ArticleMeta = ({ author, date, readTime }: { author: string; date: string; readTime: number }) => (
+const ArticleMeta = ({ readTime }: { readTime: number }) => (
   <Stack direction="row" spacing={1} alignItems="center" sx={{ mb: 3 }}>
     <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 600, textTransform: 'uppercase', letterSpacing: 1 }}>
       ARTICLE
@@ -458,8 +453,6 @@ export default function BlogPostPage() {
         >
           {/* Article Meta */}
           <ArticleMeta 
-            author={post.author}
-            date={post.createdAt ? new Date(post.createdAt).toLocaleDateString() : ''}
             readTime={calculateReadTime(post.content)}
           />
 
@@ -612,17 +605,33 @@ export default function BlogPostPage() {
                 h5: (props) => <h5 className="text-sm mb-1 mt-1 text-gray-500 font-medium" style={{fontFamily: 'inherit'}} {...props} />, 
                 h6: (props) => <h6 className="text-xs mb-1 mt-1 text-gray-400 font-medium uppercase tracking-wider" style={{fontFamily: 'inherit'}} {...props} />, 
                 a: ({...props}) => <a className="text-blue-600 dark:text-blue-400 underline hover:text-blue-800 dark:hover:text-blue-300 transition-colors" {...props} />,
-                img: ({src, alt, height, width, style, ...props}) => (
-                  <img 
-                    src={src} 
-                    alt={alt} 
-                    height={height}
-                    width={width}
-                    style={style}
-                    className="max-w-full rounded-lg shadow-md block mx-auto my-6" 
-                    {...props} 
-                  />
-                ),
+                img: ({src, alt, height, width, style}) => {
+                  // Handle Blob URLs by using regular img element
+                  if (src instanceof Blob) {
+                    return (
+                      <img 
+                        src={URL.createObjectURL(src)}
+                        alt={alt || ''}
+                        height={height ? parseInt(height.toString()) : 400}
+                        width={width ? parseInt(width.toString()) : 800}
+                        style={style}
+                        className="max-w-full rounded-lg shadow-md block mx-auto my-6" 
+                      />
+                    )
+                  }
+                  
+                  // For string URLs, use Next.js Image component
+                  return (
+                    <Image 
+                      src={src as string || ''} 
+                      alt={alt || ''} 
+                      height={height ? parseInt(height.toString()) : 400}
+                      width={width ? parseInt(width.toString()) : 800}
+                      style={style}
+                      className="max-w-full rounded-lg shadow-md block mx-auto my-6" 
+                    />
+                  )
+                },
                 table: (props) => <table className="w-full border-collapse border border-gray-300 dark:border-gray-600 my-4" {...props} />,
                 thead: (props) => <thead className="bg-gray-50 dark:bg-gray-700" {...props} />,
                 tbody: (props) => <tbody className="divide-y divide-gray-200 dark:divide-gray-600" {...props} />,

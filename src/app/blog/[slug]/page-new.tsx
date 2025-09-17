@@ -3,6 +3,7 @@
 import React, { useState, useEffect, useRef } from 'react'
 import { useParams } from 'next/navigation'
 import Link from 'next/link'
+import Image from 'next/image'
 import { motion, useInView } from 'framer-motion'
 import {
   Box,
@@ -20,7 +21,6 @@ import {
   IconButton,
   Fab,
   Tooltip,
-  Divider,
   TextField,
   List,
   ListItem,
@@ -30,12 +30,8 @@ import {
 import {
   Favorite as FavoriteIcon,
   FavoriteBorder as FavoriteBorderIcon,
-  Share as ShareIcon,
-  Comment as CommentIcon,
   Person as PersonIcon,
   ArrowBack as ArrowBackIcon,
-  ArrowForward as ArrowForwardIcon,
-  AccessTime as AccessTimeIcon,
   Twitter as TwitterIcon,
   LinkedIn as LinkedInIcon,
   Link as LinkIcon,
@@ -114,7 +110,7 @@ const stripMarkdown = (markdown: string): string => {
 }
 
 // Custom Code Block Component with Copy Functionality
-const CodeBlock = ({ children, className, ...props }: React.ComponentProps<'pre'>) => {
+const CodeBlock = ({ children, ...props }: React.ComponentProps<'pre'>) => {
   const [copied, setCopied] = useState(false)
   
   const copyToClipboard = async () => {
@@ -190,7 +186,7 @@ const CodeBlock = ({ children, className, ...props }: React.ComponentProps<'pre'
 }
 
 // Custom Inline Code Component
-const InlineCode = ({ children, ...props }: React.ComponentProps<'code'>) => {
+const InlineCode = ({ children, color, style }: React.ComponentProps<'code'>) => {
   return (
     <Chip 
       label={children}
@@ -203,14 +199,15 @@ const InlineCode = ({ children, ...props }: React.ComponentProps<'code'>) => {
         fontFamily: 'monospace',
         bgcolor: 'grey.100',
         color: 'text.primary',
+        ...(style && { ...style }),
+        ...(color && { color: color }),
       }}
-      {...props}
     />
   )
 }
 
 // Article metadata component
-const ArticleMeta = ({ author, date, readTime }: { author: string; date: string; readTime: number }) => (
+const ArticleMeta = ({ readTime }: { readTime: number }) => (
   <Stack direction="row" spacing={1} alignItems="center" sx={{ mb: 3 }}>
     <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 600, textTransform: 'uppercase', letterSpacing: 1 }}>
       ARTICLE
@@ -427,8 +424,6 @@ export default function BlogPostPage() {
         >
           {/* Article Meta */}
           <ArticleMeta 
-            author={post.author}
-            date={post.createdAt ? new Date(post.createdAt).toLocaleDateString() : ''}
             readTime={calculateReadTime(post.content)}
           />
 
@@ -507,22 +502,47 @@ export default function BlogPostPage() {
                 h3: (props) => <Typography variant="h5" component="h3" sx={{ mt: 4, mb: 2, fontWeight: 600 }} {...props} />,
                 p: (props) => <Typography variant="body1" sx={{ mb: 3, lineHeight: 1.7, fontSize: '1.125rem' }} {...props} />,
                 a: (props) => <Typography component="a" sx={{ color: 'secondary.main', textDecoration: 'underline', '&:hover': { color: 'secondary.dark' } }} {...props} />,
-                img: (props) => (
-                  <Box sx={{ my: 4, textAlign: 'center' }}>
-                    <img 
-                      {...props}
-                      style={{ 
-                        maxWidth: '100%',
-                        height: 'auto',
-                        borderRadius: '12px',
-                        boxShadow: '0 4px 12px rgba(0,0,0,0.1)'
-                      }}
-                    />
-                  </Box>
-                ),
+                img: ({src, alt, ...props}) => {
+                  // Handle Blob URLs by using regular img element
+                  if (src instanceof Blob) {
+                    return (
+                      <Box sx={{ my: 4, textAlign: 'center' }}>
+                        <img 
+                          src={URL.createObjectURL(src)}
+                          alt={alt || ''}
+                          style={{ 
+                            maxWidth: '100%',
+                            height: 'auto',
+                            borderRadius: '12px',
+                            boxShadow: '0 4px 12px rgba(0,0,0,0.1)'
+                          }}
+                          {...props}
+                        />
+                      </Box>
+                    )
+                  }
+                  
+                  // For string URLs, use Next.js Image component
+                  return (
+                    <Box sx={{ my: 4, textAlign: 'center' }}>
+                      <Image 
+                        src={src as string || ''}
+                        alt={alt || ''}
+                        width={800}
+                        height={400}
+                        style={{ 
+                          maxWidth: '100%',
+                          height: 'auto',
+                          borderRadius: '12px',
+                          boxShadow: '0 4px 12px rgba(0,0,0,0.1)'
+                        }}
+                      />
+                    </Box>
+                  )
+                },
                 pre: CodeBlock,
                 code: InlineCode,
-                blockquote: (props) => (
+                blockquote: ({ children, ...props }) => (
                   <Paper
                     sx={{
                       p: 3,
@@ -532,8 +552,9 @@ export default function BlogPostPage() {
                       borderColor: 'secondary.main',
                       fontStyle: 'italic',
                     }}
-                    {...props}
-                  />
+                  >
+                    {children}
+                  </Paper>
                 ),
                 ul: (props) => <Box component="ul" sx={{ mb: 3, pl: 3 }} {...props} />,
                 ol: (props) => <Box component="ol" sx={{ mb: 3, pl: 3 }} {...props} />,

@@ -3,79 +3,20 @@ import type { NextConfig } from "next";
 const nextConfig: NextConfig = {
   images: {
     remotePatterns: [
+      // Allow all HTTPS images from any domain
       {
         protocol: 'https',
-        hostname: 'i.ibb.co',
+        hostname: '**',
         port: '',
         pathname: '/**',
       },
+      // Allow HTTP images from localhost for development
       {
-        protocol: 'https',
-        hostname: 'images.unsplash.com',
+        protocol: 'http',
+        hostname: 'localhost',
         port: '',
         pathname: '/**',
       },
-      {
-        protocol: 'https',
-        hostname: 'via.placeholder.com',
-        port: '',
-        pathname: '/**',
-      },
-      {
-        protocol: 'https',
-        hostname: 'picsum.photos',
-        port: '',
-        pathname: '/**',
-      },
-      {
-        protocol: 'https',
-        hostname: '**.cloudinary.com',
-        port: '',
-        pathname: '/**',
-      },
-      {
-        protocol: 'https',
-        hostname: '**.amazonaws.com',
-        port: '',
-        pathname: '/**',
-      },
-      {
-        protocol: 'https',
-        hostname: '**.supabase.co',
-        port: '',
-        pathname: '/**',
-      },
-      {
-        protocol: 'https',
-        hostname: '**.vercel.app',
-        port: '',
-        pathname: '/**',
-      },
-      {
-        protocol: 'https',
-        hostname: '**.vercel.com',
-        port: '',
-        pathname: '/**',
-      },
-      {
-        protocol: 'https',
-        hostname: 't2informatik.de',
-        port: '',
-        pathname: '/**',
-      },
-      {
-        protocol: 'https',
-        hostname: 'tse1.mm.bing.net',
-        port: '',
-        pathname: '/**',
-      },
-      {
-        protocol: 'https',
-        hostname: '**.bing.net',
-        port: '',
-        pathname: '/**',
-      },
-
     ],
     unoptimized: false,
   },

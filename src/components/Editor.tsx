@@ -188,9 +188,11 @@ export default function Editor({
                   </div>
                 </div>
               ) : (
-                <img 
+                <Image 
                   src={localPreviewImage} 
                   alt={`Preview for ${localTitle}`}
+                  width={800}
+                  height={256}
                   className="w-full h-64 object-cover rounded-lg"
                   onError={(e) => {
                     console.error('Image failed to load:', localPreviewImage);
