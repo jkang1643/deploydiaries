@@ -702,12 +702,29 @@ export default function BlogPostPage() {
                       }}
                     >
                       {relatedPost.previewImage && (
-                        <CardMedia
-                          component="img"
-                          height="160"
-                          image={relatedPost.previewImage}
-                          alt={relatedPost.title}
-                        />
+                        <Box
+                          sx={{
+                            width: '100%',
+                            height: 0,
+                            paddingBottom: '66.666%', // 2/3 * 100% = 66.666% for 3:2 aspect ratio
+                            position: 'relative',
+                            overflow: 'hidden',
+                          }}
+                        >
+                          <Box
+                            component="img"
+                            src={relatedPost.previewImage}
+                            alt={relatedPost.title}
+                            sx={{
+                              position: 'absolute',
+                              top: 0,
+                              left: 0,
+                              width: '100%',
+                              height: '100%',
+                              objectFit: 'cover',
+                            }}
+                          />
+                        </Box>
                       )}
                       <CardContent>
                         <Typography variant="h6" sx={{ mb: 1, fontWeight: 600, lineHeight: 1.3 }}>

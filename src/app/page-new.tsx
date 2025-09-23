@@ -255,13 +255,29 @@ export default function Home() {
                     }}
                   >
                     {latestPost.previewImage && (
-                      <CardMedia
-                        component="img"
-                        height="280"
-                        image={latestPost.previewImage}
-                        alt={latestPost.title}
-                        sx={{ objectFit: 'cover' }}
-                      />
+                      <Box
+                        sx={{
+                          width: '100%',
+                          height: 0,
+                          paddingBottom: '56.25%', // 16:9 aspect ratio (9/16 * 100% = 56.25%) - better for text-heavy images
+                          position: 'relative',
+                          overflow: 'hidden',
+                        }}
+                      >
+                        <Box
+                          component="img"
+                          src={latestPost.previewImage}
+                          alt={latestPost.title}
+                          sx={{
+                            position: 'absolute',
+                            top: 0,
+                            left: 0,
+                            width: '100%',
+                            height: '100%',
+                            objectFit: 'cover', // Changed back to 'cover' to fill the container and remove white borders
+                          }}
+                        />
+                      </Box>
                     )}
                     
                     <CardContent sx={{ flexGrow: 1, p: 4 }}>
@@ -417,13 +433,29 @@ export default function Home() {
                     style={{ textDecoration: 'none', color: 'inherit' }}
                   >
                     {post.previewImage && (
-                      <CardMedia
-                        component="img"
-                        height="200"
-                        image={post.previewImage}
-                        alt={post.title}
-                        sx={{ objectFit: 'cover' }}
-                      />
+                      <Box
+                        sx={{
+                          width: '100%',
+                          height: 0,
+                          paddingBottom: '66.666%', // 2/3 * 100% = 66.666% for 3:2 aspect ratio
+                          position: 'relative',
+                          overflow: 'hidden',
+                        }}
+                      >
+                        <Box
+                          component="img"
+                          src={post.previewImage}
+                          alt={post.title}
+                          sx={{
+                            position: 'absolute',
+                            top: 0,
+                            left: 0,
+                            width: '100%',
+                            height: '100%',
+                            objectFit: 'cover',
+                          }}
+                        />
+                      </Box>
                     )}
                     
                     <CardContent sx={{ flexGrow: 1, p: 3 }}>

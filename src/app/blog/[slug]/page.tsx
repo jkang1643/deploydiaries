@@ -427,14 +427,23 @@ export default function BlogPostPage() {
 
       {/* Hero Image */}
       {post.previewImage && (
-        <Box sx={{ height: { xs: 300, md: 400 }, overflow: 'hidden' }}>
+        <Box sx={{ 
+          height: { xs: 300, md: 400 }, 
+          overflow: 'hidden',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          bgcolor: 'grey.100'
+        }}>
           <motion.img
             src={post.previewImage}
             alt={post.title}
             style={{
-              width: '100%',
-              height: '100%',
-              objectFit: 'cover',
+              maxWidth: '100%',
+              maxHeight: '100%',
+              width: 'auto',
+              height: 'auto',
+              objectFit: 'contain',
             }}
             initial={{ scale: 1.1 }}
             animate={{ scale: 1 }}
@@ -793,12 +802,29 @@ export default function BlogPostPage() {
                       }}
                     >
                       {relatedPost.previewImage && (
-                        <CardMedia
-                          component="img"
-                          height="160"
-                          image={relatedPost.previewImage}
-                          alt={relatedPost.title}
-                        />
+                        <Box
+                          sx={{
+                            width: '100%',
+                            height: 0,
+                            paddingBottom: '66.666%', // 2/3 * 100% = 66.666% for 3:2 aspect ratio
+                            position: 'relative',
+                            overflow: 'hidden',
+                          }}
+                        >
+                          <Box
+                            component="img"
+                            src={relatedPost.previewImage}
+                            alt={relatedPost.title}
+                            sx={{
+                              position: 'absolute',
+                              top: 0,
+                              left: 0,
+                              width: '100%',
+                              height: '100%',
+                              objectFit: 'cover',
+                            }}
+                          />
+                        </Box>
                       )}
                       <CardContent>
                         <Typography variant="h6" sx={{ mb: 1, fontWeight: 600, lineHeight: 1.3 }}>

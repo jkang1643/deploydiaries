@@ -312,14 +312,15 @@ export default function BlogPage() {
                           >
                             <Box
                               sx={{
-                                height: viewMode === 'grid' ? 200 : 160,
-                                width: viewMode === 'list' ? 240 : '100%',
+                                height: viewMode === 'grid' ? 240 : 180,
+                                width: viewMode === 'list' ? 270 : '100%',
                                 flexShrink: 0,
                                 overflow: 'hidden',
                                 backgroundColor: 'grey.100',
                                 display: 'flex',
                                 alignItems: 'center',
                                 justifyContent: 'center',
+                                position: 'relative',
                               }}
                             >
                               {post.previewImage ? (
@@ -328,6 +329,9 @@ export default function BlogPage() {
                                   src={post.previewImage}
                                   alt={post.title}
                                   sx={{
+                                    position: 'absolute',
+                                    top: 0,
+                                    left: 0,
                                     width: '100%',
                                     height: '100%',
                                     objectFit: 'cover',

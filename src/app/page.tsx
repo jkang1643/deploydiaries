@@ -106,11 +106,12 @@ export default function Home() {
         animate={{ opacity: heroInView ? 1 : 0 }}
         transition={{ duration: 0.8 }}
         sx={{ 
-          minHeight: '100vh',
+          minHeight: { xs: '100vh', sm: '100vh' },
           display: 'flex',
           alignItems: 'center',
           position: 'relative',
           overflow: 'hidden',
+          py: { xs: 8, sm: 0 },
         }}
       >
         {/* Background Pattern */}
@@ -316,7 +317,9 @@ export default function Home() {
                        <Box
                          sx={{
                            width: '100%',
-                           height: 240,
+                           height: 0,
+                           paddingBottom: '56.25%', // 16:9 aspect ratio (9/16 * 100% = 56.25%) - better for text-heavy images
+                           position: 'relative',
                            mb: 3,
                            borderRadius: 2,
                            overflow: 'hidden',
@@ -327,9 +330,12 @@ export default function Home() {
                            src={latestPost.previewImage}
                            alt={latestPost.title}
                            style={{
+                             position: 'absolute',
+                             top: 0,
+                             left: 0,
                              width: '100%',
                              height: '100%',
-                             objectFit: 'cover',
+                             objectFit: 'cover', // Changed back to 'cover' to fill the container and remove white borders
                            }}
                            whileHover={{ scale: 1.02 }}
                            transition={{ duration: 0.3 }}
@@ -403,7 +409,15 @@ export default function Home() {
       </Box>
 
       {/* Recent Articles Section */}
-      <Container maxWidth="xl" sx={{ py: 12 }}>
+      <Box
+        sx={{
+          minHeight: { xs: '100vh', sm: '100vh' },
+          display: 'flex',
+          flexDirection: 'column',
+          py: { xs: 8, sm: 12 },
+        }}
+      >
+        <Container maxWidth="xl" sx={{ flex: 1 }}>
         <Box
           component={motion.div}
           initial={{ y: 50, opacity: 0 }}
@@ -466,24 +480,26 @@ export default function Home() {
                      href={`/blog/${post.slug}`}
                      style={{ textDecoration: 'none', color: 'inherit' }}
                    >
-                     {/* Image Container with Fixed Height */}
+                     {/* Image Container with 3:2 Aspect Ratio */}
                      <Box
                        sx={{
                          width: '100%',
-                         height: 200, // Fixed height
+                         height: 0,
+                         paddingBottom: '66.666%', // 2/3 * 100% = 66.666% for 3:2 aspect ratio
+                         position: 'relative',
                          overflow: 'hidden',
                          bgcolor: 'grey.100',
-                         display: 'flex',
-                         alignItems: 'center',
-                         justifyContent: 'center',
                        }}
                      >
                        {post.previewImage ? (
-                         <CardMedia
+                         <Box
                            component="img"
-                           image={post.previewImage}
+                           src={post.previewImage}
                            alt={post.title}
                            sx={{ 
+                             position: 'absolute',
+                             top: 0,
+                             left: 0,
                              width: '100%',
                              height: '100%',
                              objectFit: 'cover' 
@@ -492,6 +508,9 @@ export default function Home() {
                        ) : (
                          <Box
                            sx={{
+                             position: 'absolute',
+                             top: 0,
+                             left: 0,
                              width: '100%',
                              height: '100%',
                              display: 'flex',
@@ -607,7 +626,8 @@ export default function Home() {
             </Button>
           </Box>
         )}
-      </Container>
+        </Container>
+      </Box>
 
       {/* About Section */}
       <Box
@@ -617,13 +637,16 @@ export default function Home() {
         animate={{ opacity: aboutInView ? 1 : 0 }}
         transition={{ duration: 1 }}
         sx={{
-          py: 12,
+          minHeight: { xs: '100vh', sm: '100vh' },
+          display: 'flex',
+          alignItems: 'center',
           bgcolor: 'grey.50',
           position: 'relative',
           overflow: 'hidden',
+          py: { xs: 8, sm: 12 },
         }}
       >
-        <Container maxWidth="lg">
+        <Container maxWidth="lg" sx={{ flex: 1 }}>
           <Grid container spacing={8} alignItems="center">
             <Grid item xs={12} md={6}>
               <motion.div
