@@ -8,7 +8,9 @@
     "start": "next start",
     "lint": "next lint",
     "postinstall": "prisma generate",
-    "postbuild": "prisma generate"
+    "postbuild": "prisma generate",
+    "migrate:db": "tsx scripts/migrate-database.ts",
+    "ping:db": "tsx scripts/ping-database.ts"
   },
   "dependencies": {
     "@emotion/cache": "^11.14.0",
@@ -47,10 +49,12 @@
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
+    "dotenv": "^17.2.3",
     "eslint": "^9",
     "eslint-config-next": "15.4.1",
     "prisma": "^6.12.0",
     "tailwindcss": "^4",
+    "tsx": "^4.20.6",
     "typescript": "^5"
   }
 }

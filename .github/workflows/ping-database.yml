@@ -1,0 +1,49 @@
+name: Ping Supabase to Prevent Pausing
+
+on:
+  schedule:
+    # Runs at 9:00 AM UTC every Monday and Thursday
+    # Format: minute hour day-of-month month day-of-week
+    # 0 9 * * 1,4 means: 9:00 AM UTC on Mondays (1) and Thursdays (4)
+    - cron: '0 9 * * 1,4'
+  workflow_dispatch: # Allows manual triggering from the GitHub UI
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+
+    steps:
+      # Step 1: Checkout the repository
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # Step 2: Set up Node.js
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      # Step 3: Install dependencies
+      - name: Install dependencies
+        run: npm ci
+
+      # Step 4: Generate Prisma Client
+      - name: Generate Prisma Client
+        run: npx prisma generate
+
+      # Step 5: Ping Database
+      - name: Ping Database
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+        run: npx tsx scripts/ping-database.ts
+
+      # Step 6: Report status
+      - name: Report success
+        if: success()
+        run: echo "✅ Database ping completed successfully"
+
+      - name: Report failure
+        if: failure()
+        run: echo "❌ Database ping failed"
+
