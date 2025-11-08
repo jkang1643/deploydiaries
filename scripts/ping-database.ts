@@ -19,15 +19,14 @@ async function pingDatabase() {
   
   try {
     console.log('🔍 Pinging database...');
-    
-    // Perform a simple query to keep the database active
-    // This counts articles, which is a lightweight operation
-    const articleCount = await prisma.article.count();
-    
-    console.log(`✅ Database ping successful! Found ${articleCount} articles.`);
+
+    // Perform a lightweight raw query that Supabase counts as activity
+    const [{ now }] = await prisma.$queryRaw<Array<{ now: Date }>>`SELECT NOW() AS now`;
+
+    console.log(`✅ Database ping successful! NOW() = ${now.toISOString()}`);
     console.log(`📅 Timestamp: ${new Date().toISOString()}`);
-    
-    return { success: true, articleCount };
+
+    return { success: true };
   } catch (error) {
     console.error('❌ Database ping failed:', error);
     throw error;

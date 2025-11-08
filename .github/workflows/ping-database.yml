@@ -2,10 +2,8 @@ name: Ping Supabase to Prevent Pausing
 
 on:
   schedule:
-    # Runs at 9:00 AM UTC every Monday and Thursday
-    # Format: minute hour day-of-month month day-of-week
-    # 0 9 * * 1,4 means: 9:00 AM UTC on Mondays (1) and Thursdays (4)
-    - cron: '0 9 * * 1,4'
+    # Runs daily at 9:00 AM UTC to guarantee activity within Supabase's 7-day window
+    - cron: '0 9 * * *'
   workflow_dispatch: # Allows manual triggering from the GitHub UI
 
 jobs:
@@ -32,13 +30,36 @@ jobs:
       - name: Generate Prisma Client
         run: npx prisma generate
 
-      # Step 5: Ping Database
+      # Step 5: Ping Supabase REST API
+      - name: Ping Supabase REST API
+        env:
+          SUPABASE_PROJECT_REF: ${{ secrets.SUPABASE_PROJECT_REF }}
+          SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
+        run: |
+          if [ -z "$SUPABASE_PROJECT_REF" ] || [ -z "$SUPABASE_ANON_KEY" ]; then
+            echo "Required Supabase REST API secrets are not configured."
+            exit 1
+          fi
+
+          HTTP_STATUS=$(curl -s -o /tmp/rest_ping -w "%{http_code}" \
+            -H "apikey: $SUPABASE_ANON_KEY" \
+            "https://$SUPABASE_PROJECT_REF.supabase.co/auth/v1/health")
+
+          if [ "$HTTP_STATUS" -lt 200 ] || [ "$HTTP_STATUS" -ge 400 ]; then
+            echo "Unexpected REST API status code: $HTTP_STATUS"
+            cat /tmp/rest_ping
+            exit 1
+          fi
+
+          echo "Supabase REST API responded with status $HTTP_STATUS"
+
+      # Step 6: Ping Database
       - name: Ping Database
         env:
           DATABASE_URL: ${{ secrets.DATABASE_URL }}
         run: npx tsx scripts/ping-database.ts
 
-      # Step 6: Report status
+      # Step 7: Report status
       - name: Report success
         if: success()
         run: echo "✅ Database ping completed successfully"
