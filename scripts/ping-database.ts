@@ -2,7 +2,7 @@
  * Database Ping Script
  * 
  * This script pings the database to keep it active and prevent Supabase from pausing it.
- * It performs a simple query to ensure the database remains active.
+ * It creates a test article entry and then deletes it to ensure database activity.
  * 
  * Usage: npx tsx scripts/ping-database.ts
  */
@@ -20,10 +20,34 @@ async function pingDatabase() {
   try {
     console.log('🔍 Pinging database...');
 
-    // Perform a lightweight raw query that Supabase counts as activity
-    const [{ now }] = await prisma.$queryRaw<Array<{ now: Date }>>`SELECT NOW() AS now`;
+    // Generate a unique slug with timestamp to ensure uniqueness
+    const timestamp = Date.now();
+    const slug = `ping-${timestamp}`;
 
-    console.log(`✅ Database ping successful! NOW() = ${now.toISOString()}`);
+    // Create article entry
+    console.log('📝 Creating test article...');
+    const article = await prisma.article.create({
+      data: {
+        title: 'ping',
+        author: 'joseph kang',
+        content: 'test',
+        slug: slug,
+      },
+    });
+
+    console.log(`✅ Article created successfully!`);
+    console.log(`   ID: ${article.id}`);
+    console.log(`   Title: ${article.title}`);
+    console.log(`   Author: ${article.author}`);
+    console.log(`   Slug: ${article.slug}`);
+
+    // Delete the article immediately
+    console.log('🗑️  Deleting test article...');
+    await prisma.article.delete({
+      where: { id: article.id },
+    });
+
+    console.log(`✅ Article deleted successfully!`);
     console.log(`📅 Timestamp: ${new Date().toISOString()}`);
 
     return { success: true };

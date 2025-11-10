@@ -8,9 +8,11 @@ This guide will help you set up GitHub Actions to automatically ping your Supaba
 2. **`.github/workflows/ping-database.yml`** - GitHub Actions workflow that runs the ping script on a schedule
 3. **`npm run ping:db`** - Command to test the ping script locally
 
-## Step 1: Add GitHub Secret
+## Step 1: Add GitHub Secrets
 
 You need to add your database connection string as a secret in GitHub:
+
+### Required Secret: DATABASE_URL
 
 1. Go to your GitHub repository
 2. Click on **Settings** (in the repository, not your account settings)
@@ -23,6 +25,17 @@ You need to add your database connection string as a secret in GitHub:
      - **Important**: Use your actual connection string, not the example format
 6. Click **Add secret**
 
+### Optional Secrets: SUPABASE_PROJECT_REF and SUPABASE_ANON_KEY
+
+These secrets are **optional** and only needed if you want to also ping the Supabase REST API. The workflow will work fine without them - it will just skip the REST API ping step.
+
+If you want to enable REST API ping:
+1. Follow the same steps above to add secrets
+2. **Name**: `SUPABASE_PROJECT_REF` - Your Supabase project reference ID
+3. **Name**: `SUPABASE_ANON_KEY` - Your Supabase anonymous/public API key
+
+You can find these in your Supabase project settings under API.
+
 ## Step 2: Test Locally (Optional)
 
 Before pushing to GitHub, you can test the ping script locally:
@@ -32,8 +45,8 @@ npm run ping:db
 ```
 
 This should connect to your database and show:
-- ✅ Database ping successful!
-- Number of articles found
+- ✅ Article created successfully (with ID, title, author, slug)
+- ✅ Article deleted successfully
 - Timestamp
 
 ## Step 3: Push to GitHub
@@ -59,19 +72,22 @@ git push
 ## Schedule Configuration
 
 The workflow is currently set to run:
-- **Every Monday at 9:00 AM UTC**
-- **Every Thursday at 9:00 AM UTC**
+- **Every day at 9:00 AM UTC** (`0 9 * * *`)
 
 To change the schedule, edit `.github/workflows/ping-database.yml` and modify the cron expression:
 - Format: `minute hour day-of-month month day-of-week`
 - Example: `0 9 * * *` = Every day at 9:00 AM UTC
 - Example: `0 */6 * * *` = Every 6 hours
+- Example: `0 9 * * 1,4` = Every Monday and Thursday at 9:00 AM UTC
 
 ## How It Works
 
 1. GitHub Actions runs on the specified schedule
 2. It installs dependencies and generates Prisma client
-3. It runs the ping script which performs a simple `COUNT` query on your Articles table
+3. It runs the ping script which:
+   - Creates a test article entry (title: "ping", author: "joseph kang", content: "test")
+   - Immediately deletes the test article
+   - This ensures real database write/delete activity, which Supabase counts as activity
 4. This keeps your database active and prevents Supabase from pausing it
 
 ## Troubleshooting
@@ -79,6 +95,10 @@ To change the schedule, edit `.github/workflows/ping-database.yml` and modify th
 ### Workflow fails with "DATABASE_URL not set"
 - Make sure you've added the secret in GitHub Settings → Secrets and variables → Actions
 - Verify the secret name is exactly `DATABASE_URL` (case-sensitive)
+
+### Workflow shows warning about REST API secrets
+- This is **normal** and not an error! The workflow will continue and ping the database via Prisma
+- If you want to enable REST API ping, add `SUPABASE_PROJECT_REF` and `SUPABASE_ANON_KEY` secrets (optional)
 
 ### Database connection error
 - Verify your `DATABASE_URL` secret is correct
@@ -93,5 +113,6 @@ To change the schedule, edit `.github/workflows/ping-database.yml` and modify th
 ## Notes
 
 - The workflow uses your existing Prisma setup, so no additional dependencies are needed
-- The ping script performs a lightweight `COUNT` query, which is efficient
+- The ping script creates and deletes a test article entry, ensuring real database activity
+- The test article uses a timestamp-based slug to ensure uniqueness
 - The workflow also supports manual triggering via the GitHub Actions UI

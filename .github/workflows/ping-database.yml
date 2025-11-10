@@ -30,34 +30,43 @@ jobs:
       - name: Generate Prisma Client
         run: npx prisma generate
 
-      # Step 5: Ping Supabase REST API
+      # Step 5: Ping Supabase REST API (optional)
       - name: Ping Supabase REST API
         env:
           SUPABASE_PROJECT_REF: ${{ secrets.SUPABASE_PROJECT_REF }}
           SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
         run: |
           if [ -z "$SUPABASE_PROJECT_REF" ] || [ -z "$SUPABASE_ANON_KEY" ]; then
-            echo "Required Supabase REST API secrets are not configured."
-            exit 1
+            echo "⚠️  Supabase REST API secrets are not configured. Skipping REST API ping."
+            echo "💡 To enable REST API ping, add SUPABASE_PROJECT_REF and SUPABASE_ANON_KEY secrets in GitHub Settings."
+            exit 0
           fi
 
+          echo "🔍 Pinging Supabase REST API..."
           HTTP_STATUS=$(curl -s -o /tmp/rest_ping -w "%{http_code}" \
             -H "apikey: $SUPABASE_ANON_KEY" \
             "https://$SUPABASE_PROJECT_REF.supabase.co/auth/v1/health")
 
           if [ "$HTTP_STATUS" -lt 200 ] || [ "$HTTP_STATUS" -ge 400 ]; then
-            echo "Unexpected REST API status code: $HTTP_STATUS"
+            echo "⚠️  Unexpected REST API status code: $HTTP_STATUS"
             cat /tmp/rest_ping
-            exit 1
+            echo "⚠️  Continuing with database ping anyway..."
+            exit 0
           fi
 
-          echo "Supabase REST API responded with status $HTTP_STATUS"
+          echo "✅ Supabase REST API responded with status $HTTP_STATUS"
 
       # Step 6: Ping Database
       - name: Ping Database
         env:
           DATABASE_URL: ${{ secrets.DATABASE_URL }}
-        run: npx tsx scripts/ping-database.ts
+        run: |
+          if [ -z "$DATABASE_URL" ]; then
+            echo "❌ DATABASE_URL secret is not configured."
+            echo "💡 Please add DATABASE_URL secret in GitHub Settings → Secrets and variables → Actions"
+            exit 1
+          fi
+          npx tsx scripts/ping-database.ts
 
       # Step 7: Report status
       - name: Report success
