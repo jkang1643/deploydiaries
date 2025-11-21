@@ -104,6 +104,11 @@ To change the schedule, edit `.github/workflows/ping-database.yml` and modify th
 - Verify your `DATABASE_URL` secret is correct
 - Make sure you're using the pooler connection string (not direct)
 - Check that your Supabase project is active
+- **After migrating to a new database:** Update the `DATABASE_URL` secret in GitHub to point to your new database:
+  1. Go to GitHub → Your Repository → Settings → Secrets and variables → Actions
+  2. Find `DATABASE_URL` and click **Update**
+  3. Replace with your new database connection string (should contain your new project ref, e.g., `buexhyqkvhtbsroebecm`)
+  4. The format should be: `postgresql://postgres.[new-project-ref]:[password]@aws-1-us-east-2.pooler.supabase.com:5432/postgres`
 
 ### Want to ping more frequently?
 - Edit `.github/workflows/ping-database.yml`

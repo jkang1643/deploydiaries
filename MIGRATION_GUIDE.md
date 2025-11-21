@@ -120,22 +120,43 @@ Once migration is complete and verified:
    ```
    (Contains `npwrxwwjwixnmfibhzpt` - this is the OLD database)
    
-   **New database URL to set in Vercel:**
+   **New database URL to set in Vercel (POOLER FORMAT - REQUIRED):**
    ```
-   postgresql://postgres:Jesus*=1hamelech@db.buexhyqkvhtbsroebecm.supabase.co:5432/postgres
+   postgresql://postgres.buexhyqkvhtbsroebecm:Jesus*=1hamelech@aws-1-us-east-2.pooler.supabase.com:5432/postgres
    ```
-   (Contains `buexhyqkvhtbsroebecm` - this is the NEW database)
+   ⚠️ **IMPORTANT:** You MUST use the **pooler** connection string format (with `pooler.supabase.com`) for Vercel/serverless environments. The direct connection format (`db.buexhyqkvhtbsroebecm.supabase.co`) will NOT work.
+   
+   **To get the exact pooler connection string:**
+   1. Go to your new Supabase project dashboard
+   2. Navigate to **Settings → Database**
+   3. Under **Connection string**, select **"URI"** mode
+   4. Copy the **pooler** connection string (it should contain `pooler.supabase.com`)
    
    **Steps:**
    - Go to your Vercel project dashboard
    - Navigate to **Settings → Environment Variables**
+   
+   **Update DATABASE_URL:**
    - Find the `DATABASE_URL` variable
    - Click **Edit** and replace it with the new database URL above
-   - Make sure to select the correct environments (Production, Preview, Development)
+   - ⚠️ **CRITICAL:** Make sure **Production** is checked (not just Preview/Development)
    - **Save** the changes
-   - **Redeploy** your application (or wait for the next deployment)
    
-   ⚠️ **Important:** Your production app will continue using the old database until you update this in Vercel!
+   **Update DIRECT_URL (Required for Prisma):**
+   - Find or create the `DIRECT_URL` variable
+   - Set it to the **same value** as `DATABASE_URL` (the pooler connection string)
+   - ⚠️ **CRITICAL:** Make sure **Production** is checked
+   - **Save** the changes
+   
+   **Redeploy:**
+   - Go to **Deployments** tab
+   - Click the **three dots (⋯)** on the latest deployment
+   - Click **Redeploy** to apply the new environment variables
+   
+   ⚠️ **Important:** Your production app will continue using the old database until you:
+   1. Update both `DATABASE_URL` and `DIRECT_URL` in Vercel
+   2. Make sure they're enabled for **Production** environment
+   3. **Redeploy** your application
 
 4. **Test your application to ensure everything works correctly**
    - Check that your articles are loading from the new database
@@ -150,6 +171,48 @@ Once migration is complete and verified:
 - Check that `DATABASE_URL` in `.env.local` points to the new database (should contain `buexhyqkvhtbsroebecm` for the new one)
 - If using Vercel, make sure you've updated the `DATABASE_URL` environment variable in Vercel project settings and redeployed
 - Verify the connection string format matches what Supabase provides
+
+### Production (Vercel) won't connect but local dev works ⚠️ **COMMON ISSUE**
+
+If your local development works but production on Vercel doesn't connect:
+
+1. **Check Environment Variable Scope:**
+   - Go to Vercel → Your Project → Settings → Environment Variables
+   - Find `DATABASE_URL` and click **Edit**
+   - **CRITICAL:** Make sure it's checked for **Production** environment (not just Preview/Development)
+   - The checkboxes should show: ✅ Production, ✅ Preview, ✅ Development (or at least ✅ Production)
+   - Save the changes
+
+2. **Set DIRECT_URL (Prisma requires it):**
+   - Your Prisma schema uses both `DATABASE_URL` and `DIRECT_URL`
+   - In Vercel Environment Variables, add or update `DIRECT_URL`:
+     ```
+     postgresql://postgres.buexhyqkvhtbsroebecm:Jesus*=1hamelech@aws-1-us-east-2.pooler.supabase.com:5432/postgres
+     ```
+   - Set it to the **same value as DATABASE_URL** (the pooler connection string)
+   - Make sure it's also checked for **Production** environment
+
+3. **Verify Connection String Format:**
+   - Must use **pooler** format: `aws-1-us-east-2.pooler.supabase.com`
+   - Must NOT use direct format: `db.buexhyqkvhtbsroebecm.supabase.co` (won't work from Vercel)
+   - Must contain your new project ref: `buexhyqkvhtbsroebecm` (not `npwrxwwjwixnmfibhzpt`)
+
+4. **Redeploy After Updating:**
+   - After updating environment variables, you **MUST redeploy**
+   - Go to Vercel → Your Project → Deployments
+   - Click the **three dots (⋯)** on the latest deployment
+   - Click **Redeploy**
+   - Or push a new commit to trigger a new deployment
+
+5. **Check Vercel Logs:**
+   - Go to Vercel → Your Project → Deployments → Click on a deployment
+   - Check the **Logs** tab for database connection errors
+   - Look for errors like "Can't reach database server" or connection timeouts
+
+6. **Verify What Vercel is Using:**
+   - In Vercel Environment Variables, check the actual value stored
+   - Make sure there are no extra spaces or quotes
+   - The connection string should start with `postgresql://` and contain `pooler.supabase.com`
 
 ### Error: "NEW_DATABASE_URL environment variable is not set"
 - Make sure you've added `NEW_DATABASE_URL` to your `.env.local` file
