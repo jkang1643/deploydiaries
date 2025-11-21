@@ -94,20 +94,62 @@ After the migration completes:
    DATABASE_URL="your-new-database-url" npx prisma studio
    ```
 
-## Step 6: Update Your Application
+## Step 6: Update Your Application ⚠️ **CRITICAL STEP**
 
 Once migration is complete and verified:
 
-1. Update your `.env.local` to use the new database:
+1. **Update your `.env.local` to use the new database:**
    ```bash
-   DATABASE_URL="your-new-database-url"
+   DATABASE_URL="postgresql://postgres:[YOUR_PASSWORD]@db.[your-new-project-ref].supabase.co:5432/postgres"
    ```
+   Replace `[YOUR_PASSWORD]` with your actual database password and `[your-new-project-ref]` with your new project reference.
 
-2. Update your production environment variables (Vercel, etc.) with the new `DATABASE_URL`
+2. **Restart your development server:**
+   ```bash
+   # Stop your current dev server (Ctrl+C)
+   # Then restart it:
+   npm run dev
+   ```
+   ⚠️ **Important:** Environment variables are only loaded when the server starts. You MUST restart your dev server after changing `DATABASE_URL`.
 
-3. Test your application to ensure everything works correctly
+3. **Update your production environment variables (Vercel, etc.) with the new `DATABASE_URL`** ⚠️ **REQUIRED FOR PRODUCTION**
+   
+   **Current (OLD) database in Vercel:**
+   ```
+   postgresql://postgres.npwrxwwjwixnmfibhzpt:Jesus*=1hamelech@aws-0-us-east-2.pooler.supabase.com:5432/postgres
+   ```
+   (Contains `npwrxwwjwixnmfibhzpt` - this is the OLD database)
+   
+   **New database URL to set in Vercel:**
+   ```
+   postgresql://postgres:Jesus*=1hamelech@db.buexhyqkvhtbsroebecm.supabase.co:5432/postgres
+   ```
+   (Contains `buexhyqkvhtbsroebecm` - this is the NEW database)
+   
+   **Steps:**
+   - Go to your Vercel project dashboard
+   - Navigate to **Settings → Environment Variables**
+   - Find the `DATABASE_URL` variable
+   - Click **Edit** and replace it with the new database URL above
+   - Make sure to select the correct environments (Production, Preview, Development)
+   - **Save** the changes
+   - **Redeploy** your application (or wait for the next deployment)
+   
+   ⚠️ **Important:** Your production app will continue using the old database until you update this in Vercel!
+
+4. **Test your application to ensure everything works correctly**
+   - Check that your articles are loading from the new database
+   - Verify that new articles are being saved to the new database
 
 ## Troubleshooting
+
+### App is still using the old database after migration
+- **Most common issue:** You need to restart your development server after updating `DATABASE_URL`
+  - Stop your dev server (Ctrl+C)
+  - Restart with `npm run dev`
+- Check that `DATABASE_URL` in `.env.local` points to the new database (should contain `buexhyqkvhtbsroebecm` for the new one)
+- If using Vercel, make sure you've updated the `DATABASE_URL` environment variable in Vercel project settings and redeployed
+- Verify the connection string format matches what Supabase provides
 
 ### Error: "NEW_DATABASE_URL environment variable is not set"
 - Make sure you've added `NEW_DATABASE_URL` to your `.env.local` file
